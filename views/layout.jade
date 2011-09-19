@@ -1,0 +1,26 @@
+!!! 5
+html(lang="en")
+  head
+    meta(charset="utf-8")
+    title #{title}
+    link(rel="stylesheet", href="/stylesheets/style.css")
+    | <!--[if lt IE 9]
+    script(src="http://html5shiv.googlecode.com/svn/trunk/html5.js")
+    | <![endif]-->
+  body
+    header
+      nav
+        ul
+          li
+            a(href="/") Home
+          li
+            a(href="/users") Users
+          li
+            a(href="/about") About
+          li
+            a(href="/posts") Posts
+      != partial('login');
+    section!= body
+    footer
+      p The Footer
+    

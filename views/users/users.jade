@@ -1,0 +1,17 @@
+h1= title
+h3 Here's the users
+p There're right around here somewhere 
+p Or right, here they are:
+ul.users
+  - each user in users
+    li= user.name + ' ' + user.email + '>\n'
+p Or another way
+ul.users
+  != partial('user', users);
+p Or a third way
+ul.users
+  != partial('userGlobal', {collection: users, as: global});
+p Or a forth way
+ul.users
+  != partial('userPerson', {collection: users, as: 'person'});
+

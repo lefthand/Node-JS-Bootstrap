@@ -1,0 +1,15 @@
+h1= title
+h3 Here's the user
+p Some info about the user.
+p Name: #{user.name}
+p Username: #{user.username}
+p Email: #{user.email}
+-if (loggedInUser.is_root)
+  p Is Root: #{user.is_root}
+-if (loggedInUser.is_admin || loggedInUser.is_root)
+  p Is Admin: #{user.is_admin}
+-if (loggedInUser.is_admin || loggedInUser.is_root || loggedInUser._id === user._id)
+  p 
+    a(href='/user/#{user._id}/edit/') Edit User
+p Image:
+  img(src='http://static1.robohash.com/#{user.name}')

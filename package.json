@@ -1,0 +1,12 @@
+{
+    "name": "application-name"
+  , "version": "0.0.1"
+  , "private": true
+  , "dependencies": {
+      "express": "latest"
+    , "stylus": "latest"
+    , "jade": "latest"
+    , "mongodb": "0.9.6-9"
+    , "connect-redis": "latest"
+  }
+}

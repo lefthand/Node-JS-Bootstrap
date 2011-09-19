@@ -1,0 +1,14 @@
+- if (!loggedInUser.username)
+  p Let's log in!
+  form(method='POST', action='/login')
+    p Username:
+        input(name='username')
+    p Password:
+      input(name='password', type='password')
+    p Remember Me:
+      input(name='remember', type='checkbox')
+    p
+      input(type='submit')
+- else
+  p
+    a(href='/logout/') Let's log out! \n

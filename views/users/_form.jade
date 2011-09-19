@@ -1,0 +1,16 @@
+form(method='POST', action='/user/#{user._id}/submit')
+  p Name:
+    input(value='#{user.name}', name='name')
+  p Username:
+    input(value='#{user.username}', name='username')
+  p Email:
+    input(value='#{user.email}', name='email')
+  p Password:
+    input(type='password', name='password')
+  -if (loggedInUser.is_root)
+    p Is Root:
+      input(type='checkbox', checked=user.is_root, name='is_root')
+    p Is Admin:
+      input(type='checkbox', checked=user.is_admin, name='is_admin')
+  p
+    input(type='submit')

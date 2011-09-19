@@ -1,0 +1,6 @@
+h1= title
+h3 Here's the user
+p Edit info about the user.
+  != partial('form', user);
+p Image:
+  img(src='http://static1.robohash.com/#{user.name}')
