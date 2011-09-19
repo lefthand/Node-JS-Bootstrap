@@ -1,0 +1,1 @@
+This project servers to give a basic node.js setup using mongodb. You can create accounts, set admin, log in and out, and create and manage 'posts'. This aims to be a bootstrap for other projects to be built upon.
