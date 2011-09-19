@@ -93,11 +93,11 @@ app.get('/users', loadUser, function(req, res){
   });
 });
 
-app.get('/user/add', loadUser, function(req, res, next){
-  res.render('users/add', { title: 'New User', loggedInUser:req.user });
+app.get('/user/create', loadUser, function(req, res, next){
+  res.render('users/create', { title: 'New User', loggedInUser:req.user });
 });
 
-app.post('/user/add', loadUser, function(req, res, next){
+app.post('/user/create', loadUser, function(req, res, next){
   countProvider.getUniqueId('users', function(error, id) {
     userProvider.save({
       _id: id,
