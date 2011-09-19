@@ -6,6 +6,7 @@ var RedisStore = require('connect-redis')(express);
 var sessionStore = new RedisStore();
 var redis = require("redis");
 var client = redis.createClient();
+var bcrypt = require('bcrypt'); 
 
 var Session = connect.middleware.session.Session,
     parseCookie = connect.utils.parseCookie
@@ -58,7 +59,7 @@ client.incr("connections", function (err, reply) {
 
 // Routes
 function loadUser(req, res, next) {
-  if (req.session.user) {
+  if (req.session.user && req.cookies.rememberme) {
     console.log('Logged In: ' + req.session.user.username);
     req.user = req.session.user;
   }
@@ -124,51 +125,67 @@ app.get('/user/:id/remove', loadUser, function(req, res, next){
 });
 
 app.post('/user/:id/submit', loadUser, function(req, res){
-  userProvider.update({
-    _id: req.params.id,
-    data: {
-      name: req.param('name'),
-      username: req.param('username'),
-      email: req.param('email'),
-      password: req.param('password'),
-      is_root: req.param('is_root'),
-      is_admin: req.param('is_admin')
-    }
-  }, function( error, docs) {
-    res.redirect('/user/' + req.params.id);
-  });
+  if (req.param('password')) {
+    var salt = bcrypt.gen_salt_sync(10);  
+    var hash = bcrypt.encrypt_sync(req.param('password'), salt);
+    userProvider.update({
+      _id: req.params.id,
+      data: {
+        name: req.param('name'),
+        username: req.param('username'),
+        email: req.param('email'),
+        password: hash,
+        is_root: req.param('is_root'),
+        is_admin: req.param('is_admin')
+      }
+    }, function( error, docs) {
+      res.redirect('/user/' + req.params.id);
+    });
+  }
 });
 
 app.get('/user/:id', loadUser, function(req, res, next){
   userProvider.findById(req.params.id, function(error, user) {
-    res.render('users/show', { user: user, title: 'User ' + req.params.id, loggedInUser:req.user });
+    res.render('users/user', { user: user, title: 'User ' + req.params.id, loggedInUser:req.user });
   });
 });
 
 app.post('/login', loadUser, function(req, res){
-  userProvider.findOne({username: req.param('username')}, function (error, user) {
-    if (error || !user) {
-      console.log('Couldn\'t find user! ' + req.param('username'));
-    }
-    else {
-      if (req.param('password') &&  req.param('password') === user.password) {
-        if (req.session) {
-          console.log('Someone logged in! ' + req.param('username') + ' ' + user._id);
-          req.session.user = user;
-        }
+  if (req.param('username') && req.param('password')) {
+    userProvider.findOne({username: req.param('username')}, function (error, user) {
+      if (error || !user) {
+        console.log('Couldn\'t find user! ' + req.param('username'));
       }
       else {
-        console.log('Wrong password for ' + req.param('username') + '!');
+        var salt = bcrypt.gen_salt_sync(10);  
+        var hash = bcrypt.encrypt_sync(req.param('password'), salt);
+        
+        if (bcrypt.compare_sync(req.param('password'), hash)) {
+          if (req.session) {
+            console.log('Someone logged in! ' + req.param('username') + ' ' + user._id);
+            req.session.user = user;
+            if (req.param('remember') == 'on') {
+              res.cookie('rememberme', 'yes', { maxAge: 31557600000});
+            }
+            else {
+              res.cookie('rememberme', 'yes');
+            }
+          }
+        }
+        else {
+          console.log('Wrong password for ' + req.param('username') + '!');
+        }
       }
-    }
-    res.redirect('back');
-  });
+      res.redirect('back');
+    });
+  }
 });
 
 app.get('/logout', function(req, res){
     if (req.session.user) {
       console.log('Logging Out: ' + req.session.user.username);
       delete req.session.user;
+      res.clearCookie('rememberme', {path:'/'});
     }
     res.redirect('/');
 });

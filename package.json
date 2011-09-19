@@ -7,6 +7,7 @@
     , "stylus": "latest"
     , "jade": "latest"
     , "mongodb": "0.9.6-9"
+    , "bcrypt": "latest"
     , "connect-redis": "latest"
   }
 }
