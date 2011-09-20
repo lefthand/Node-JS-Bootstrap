@@ -1,4 +1,4 @@
-This project servrs to give a basic node.js setup using mongodb. This aims to be a bootstrap for other projects to be built upon.
+This project serves to give a basic node.js setup using mongodb. This aims to be a bootstrap for other projects to be built upon providing a robust yet basic framework to build on.
 
 Stack
 =====
@@ -14,14 +14,14 @@ Stack
 Goals
 =====
   
--  Create members
--  Users can create their own accounts
--  Users can update or delete their own accouts
--  Admin can update or delete any user record
--  Root users can do all that admin can plus create admins
--  User list and detail available to all
--  Users can log in and log out
--  Users can choose to remain logged in indefinitely
+-  Create members - DONE
+-  Users can create their own accounts - DONE
+-  Users can update or delete their own accouts - DONE
+-  Admin can update or delete any user record - DONE
+-  Root users can do all that admin can plus create admins - DONE
+-  User list and detail available to all - DONE
+-  Users can log in and log out - DONE
+-  Users can choose to remain logged in indefinitely - DONE
 -  A generic 'post' can be add
 -  If the user is not logged in when posting, a basic account is created
 -  The basic account cannot log in
@@ -34,7 +34,8 @@ Goals
 -  Users can respond to messages
 -  Post list page creates persistent connection 
 -  New posts are automatically pushed to users
-
+-  Both in line and post submit verification of data
+-  Passwords are hased and secure - DONE
 
 
  
