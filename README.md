@@ -1,4 +1,4 @@
-This project servers to give a basic node.js setup using mongodb. This aims to be a bootstrap for other projects to be built upon.
+This project servrs to give a basic node.js setup using mongodb. This aims to be a bootstrap for other projects to be built upon.
 
 Stack
 =====
