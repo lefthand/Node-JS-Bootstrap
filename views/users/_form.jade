@@ -13,4 +13,7 @@ form(method='POST', action='/user/#{user._id}/submit')
     p Is Admin:
       input(type='checkbox', checked=user.is_admin, name='is_admin')
   p
-    input(type='submit')
+    input(type='submit', value='Save')
+-if (loggedInUser.is_root || loggedInUser.is_admin || loggedInUser._id === user._id)
+  p
+    a(href='/user/#{user._id}/remove') Delete Account 

@@ -117,11 +117,23 @@ app.get('/user/:id/edit', loadUser, function(req, res, next){
 
 app.get('/user/:id/remove', loadUser, function(req, res, next){
   if (req.params.id === 'null') {
-    req.params.id = '';
+    res.redirect('/users');
   }
-  userProvider.remove(req.params.id, function(error, user) {
+  if (req.user.is_root || req.user.is_admin || req.user._id == req.params.id) { 
+    userProvider.remove(req.params.id, function(error, id){
+      console.log('Deleted user ' + id);
+    });
+    if (req.user._id == req.params.id) { 
+      res.redirect('/logout');
+    }
+    else {
+      res.redirect('/users');
+    }
+  }
+  else {
+    console.log(typeof req.user._id + ' can\'t delete this user! ' + typeof req.params.id);
     res.redirect('/users')
-  });
+  }
 });
 
 app.post('/user/:id/submit', loadUser, function(req, res){

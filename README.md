@@ -18,8 +18,7 @@ Goals
 -  Users can create their own accounts
 -  Users can update or delete their own accouts
 -  Admin can update or delete any user record
--  Admin can make other admins
--  Root users can do all that root can plus ???
+-  Root users can do all that admin can plus create admins
 -  User list and detail available to all
 -  Users can log in and log out
 -  Users can choose to remain logged in indefinitely
