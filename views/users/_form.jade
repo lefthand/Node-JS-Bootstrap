@@ -7,6 +7,8 @@ form(method='POST', action='/user/#{user._id}/submit')
     input(value='#{user.email}', name='email')
   p Password:
     input(type='password', name='password')
+  p Confirm Password:
+    input(type='password', name='password_confirm')
   -if (loggedInUser.is_root)
     p Is Root:
       input(type='checkbox', checked=user.is_root, name='is_root')

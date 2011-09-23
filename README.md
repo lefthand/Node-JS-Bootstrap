@@ -36,6 +36,7 @@ Goals
 -  New posts are automatically pushed to users
 -  Both in line and post submit verification of data
 -  Passwords are hased and secure - DONE
+-  Vows need to be used as much as possible
 
 
  

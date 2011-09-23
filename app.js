@@ -60,7 +60,6 @@ client.incr("connections", function (err, reply) {
 // Routes
 function loadUser(req, res, next) {
   if (req.session.user && req.cookies.rememberme) {
-    console.log('Logged In: ' + req.session.user.username);
     req.user = req.session.user;
   }
   else {
@@ -137,22 +136,63 @@ app.get('/user/:id/remove', loadUser, function(req, res, next){
 });
 
 app.post('/user/:id/submit', loadUser, function(req, res){
+  errors = [];
+  data = {};
   if (req.param('password')) {
-    var salt = bcrypt.gen_salt_sync(10);  
-    var hash = bcrypt.encrypt_sync(req.param('password'), salt);
-    userProvider.update({
-      _id: req.params.id,
-      data: {
-        name: req.param('name'),
-        username: req.param('username'),
-        email: req.param('email'),
-        password: hash,
-        is_root: req.param('is_root'),
-        is_admin: req.param('is_admin')
+    if (req.param('password').length < 5) {
+      errors.push('Password too short.');  
+    }
+    else if (req.param('password') !== req.param('password_confirm')) {
+      errors.push('Passwords did not match.');  
+    }
+    else {
+      var salt = bcrypt.gen_salt_sync(10);  
+      var hash = bcrypt.encrypt_sync(req.param('password'), salt);
+      data.password = hash;
+    }
+  }
+  if (!req.param('username')) {
+    errors.push('Username required.');  
+  }
+  if (!req.param('name')) {
+    errors.push('Name required.');  
+  }
+  if (!/.*@.*\..*/.test(req.param('email'))){
+    errors.push('Valid email required.');  
+  }
+  if (errors.length == 0) {
+    data.name = req.param('name');
+    data.username = req.param('username');
+    data.email = req.param('email');
+    if (req.user.is_root) {
+      data.is_root = req.param('is_root');
+      data.is_admin = req.param('is_admin');
+    }
+    userProvider.findOne({$or: [{username: req.param('username')},{email: req.param('email')}], _id: {$ne: req.params.id}}, function (error, user) {
+      // I don't know why the filter isn't working in the query?!!?
+      if (user._id != req.params.id) {
+        if (user.username == req.param('username')) {
+          errors.push('Username already taken.' + req.params.id);  
+        }
+        if (user.email == req.param('email')) {
+          errors.push('Email Address already taken.');  
+        }
+        console.log(errors);
+        res.redirect('/user/' + req.params.id + '/edit/?' + errors);
       }
-    }, function( error, docs) {
-      res.redirect('/user/' + req.params.id);
+      else {
+        userProvider.update({
+          _id: req.params.id,
+          data : data
+        }, function( error, docs) {
+          res.redirect('/user/' + req.params.id);
+        });
+      }
     });
+  }
+  else  {
+    console.log(errors);
+    res.redirect('/user/' + req.params.id + '/edit/?' + errors);
   }
 });
 
@@ -169,10 +209,7 @@ app.post('/login', loadUser, function(req, res){
         console.log('Couldn\'t find user! ' + req.param('username'));
       }
       else {
-        var salt = bcrypt.gen_salt_sync(10);  
-        var hash = bcrypt.encrypt_sync(req.param('password'), salt);
-        
-        if (bcrypt.compare_sync(req.param('password'), hash)) {
+        if (bcrypt.compare_sync(req.param('password'), user.password)) {
           if (req.session) {
             console.log('Someone logged in! ' + req.param('username') + ' ' + user._id);
             req.session.user = user;
@@ -185,7 +222,7 @@ app.post('/login', loadUser, function(req, res){
           }
         }
         else {
-          console.log('Wrong password for ' + req.param('username') + '!');
+          console.log('Wrong password for ' + user.username + '!');
         }
       }
       res.redirect('back');
