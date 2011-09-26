@@ -57,7 +57,70 @@ client.incr("connections", function (err, reply) {
   console.log("This has been run " + reply + " times!");
 });
 
-// Routes
+
+function validateUserData(req, callback) {
+  errors = [];
+  data = {};
+  if (req.param('password')) {
+    if (req.param('password').length < 5) {
+      errors.push('Password too short.');  
+    }
+    else if (req.param('password') !== req.param('password_confirm')) {
+      errors.push('Passwords did not match.' + req.param('password' + ' ' + req.param('password_confirm')));  
+    }
+    else {
+      var salt = bcrypt.gen_salt_sync(10);  
+      var hash = bcrypt.encrypt_sync(req.param('password'), salt);
+      data.password = hash;
+    }
+  }
+  else if (!req.param('id')) {
+    errors.push('Password required.');  
+  }
+  if (!req.param('username')) {
+    errors.push('Username required.');  
+  }
+  if (!req.param('name')) {
+    errors.push('Name required.');  
+  }
+  if (!/.*@.*\..*/.test(req.param('email'))){
+    errors.push('Valid email required.');  
+  }
+  if (errors.length == 0) {
+    data.name = req.param('name');
+    data.username = req.param('username');
+    data.email = req.param('email');
+    if (req.user.is_root) {
+      data.is_root = req.param('is_root');
+      data.is_admin = req.param('is_admin');
+    }
+    userProvider.find({_id: {$ne: parseInt(req.params.id)},
+                          $or: [{username: req.param('username')},
+                                {email: req.param('email')}]
+                      }, function (error, users) {
+      if (users.length > 0) {
+        for (var i in users) {
+          if (typeof users[i] !== 'function') {
+            if (users[i].username == req.param('username')) {
+              errors.push('Username already taken.');  
+            }
+            if (users[i].email == req.param('email')) {
+              errors.push('Email Address already taken.');  
+            }
+          }
+        }
+        callback(errors);
+      }
+      else {
+        callback( null, data);
+      }
+    });
+  }
+  else {
+    callback(errors);
+  }
+}
+
 function loadUser(req, res, next) {
   if (req.session.user && req.cookies.rememberme) {
     req.user = req.session.user;
@@ -65,9 +128,18 @@ function loadUser(req, res, next) {
   else {
     req.user = {};
   }
+  req.meOrAdmin = false;
+  req.meOrRoot = false;
+  if (req.params.id == req.user._id || req.user.is_root || req.user.is_admin) {
+    req.meOrAdmin = true;
+  }
+  if (req.params.id == req.user._id || req.user.is_root) {
+    req.meOrRoot = true;
+  }
   next();
 }
 
+// Routes
 app.get('/', loadUser, function(req, res){
   res.render('index', {
     title: 'Fun', loggedInUser:req.user 
@@ -92,33 +164,24 @@ app.get('/users', loadUser, function(req, res){
   });
 });
 
-app.get('/user/create', loadUser, function(req, res, next){
-  res.render('users/create', { title: 'New User', loggedInUser:req.user });
-});
-
-app.post('/user/create', loadUser, function(req, res, next){
-  countProvider.getUniqueId('users', function(error, id) {
-    userProvider.save({
-      _id: id,
-      name: req.param('name'),
-      email: req.param('email')
-    }, function( error, docs) {
-      res.redirect('/users')
-    });
-  });
-});
-
 app.get('/user/:id/edit', loadUser, function(req, res, next){
-  userProvider.findById(req.params.id, function(error, user) {
-    res.render('users/edit', { user: user, title: 'User ' + req.params.id, loggedInUser:req.user });
-  });
+  if (req.meOrAdmin) {
+    localScripts = '$(document).ready(function(){$(\'#userForm\').validate();});';
+    userProvider.findById(req.params.id, function(error, user) {
+      res.render('users/edit', { user: user, title: 'User ' + req.params.id, loggedInUser:req.user });
+    });
+  }
+  else {
+    res.redirect('/users');
+  }
 });
 
 app.get('/user/:id/remove', loadUser, function(req, res, next){
   if (req.params.id === 'null') {
     res.redirect('/users');
   }
-  if (req.user.is_root || req.user.is_admin || req.user._id == req.params.id) { 
+  // TEST!!!! 
+  if (req.meOrAdmin) {
     userProvider.remove(req.params.id, function(error, id){
       console.log('Deleted user ' + id);
     });
@@ -135,50 +198,36 @@ app.get('/user/:id/remove', loadUser, function(req, res, next){
   }
 });
 
-app.post('/user/:id/submit', loadUser, function(req, res){
-  errors = [];
+app.get('/user/create', loadUser, function(req, res, next){
+  localScripts = '$(document).ready(function(){$(\'#userForm\').validate();});';
+  res.render('users/create', { title: 'New User', user: {_id:'',username:'',name:'',email:''}, loggedInUser:req.user });
+});
+
+app.post('/user/submit/0?', loadUser, function(req, res, next){
   data = {};
-  if (req.param('password')) {
-    if (req.param('password').length < 5) {
-      errors.push('Password too short.');  
-    }
-    else if (req.param('password') !== req.param('password_confirm')) {
-      errors.push('Passwords did not match.');  
+  validateUserData(req, function (error, data){
+    if (error) {
+      console.log('Errors: ' + error);
+      res.redirect('/user/create/?' + error);
     }
     else {
-      var salt = bcrypt.gen_salt_sync(10);  
-      var hash = bcrypt.encrypt_sync(req.param('password'), salt);
-      data.password = hash;
+      countProvider.getUniqueId('users', function(error, id) {
+        data._id = id;
+        userProvider.save( data, function( error, docs) {
+          res.redirect('/user/' + id);
+        });
+      });
     }
-  }
-  if (!req.param('username')) {
-    errors.push('Username required.');  
-  }
-  if (!req.param('name')) {
-    errors.push('Name required.');  
-  }
-  if (!/.*@.*\..*/.test(req.param('email'))){
-    errors.push('Valid email required.');  
-  }
-  if (errors.length == 0) {
-    data.name = req.param('name');
-    data.username = req.param('username');
-    data.email = req.param('email');
-    if (req.user.is_root) {
-      data.is_root = req.param('is_root');
-      data.is_admin = req.param('is_admin');
-    }
-    userProvider.findOne({$or: [{username: req.param('username')},{email: req.param('email')}], _id: {$ne: req.params.id}}, function (error, user) {
-      // I don't know why the filter isn't working in the query?!!?
-      if (user._id != req.params.id) {
-        if (user.username == req.param('username')) {
-          errors.push('Username already taken.' + req.params.id);  
-        }
-        if (user.email == req.param('email')) {
-          errors.push('Email Address already taken.');  
-        }
-        console.log(errors);
-        res.redirect('/user/' + req.params.id + '/edit/?' + errors);
+  });
+});
+
+app.post('/user/submit/:id', loadUser, function(req, res){
+  if (req.meOrAdmin) {
+    data = {};
+    validateUserData(req, function (error, data){
+      if (error) {
+        console.log('Errors: ' + error);
+        res.redirect('/user/' + req.params.id + '/edit/?' + error);
       }
       else {
         userProvider.update({
@@ -190,9 +239,8 @@ app.post('/user/:id/submit', loadUser, function(req, res){
       }
     });
   }
-  else  {
-    console.log(errors);
-    res.redirect('/user/' + req.params.id + '/edit/?' + errors);
+  else {
+    res.redirect('/');
   }
 });
 

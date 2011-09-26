@@ -1,6 +1,6 @@
-form(method='POST', action='/user/#{user._id}/submit')
+form(method='POST', action='/user/submit/#{user._id}', id='userForm')
   p Name:
-    input(value='#{user.name}', name='name')
+    input(value='#{user.name}', name='name', class='required')
   p Username:
     input(value='#{user.username}', name='username')
   p Email:
@@ -16,6 +16,6 @@ form(method='POST', action='/user/#{user._id}/submit')
       input(type='checkbox', checked=user.is_admin, name='is_admin')
   p
     input(type='submit', value='Save')
--if (loggedInUser.is_root || loggedInUser.is_admin || loggedInUser._id === user._id)
+-if ((loggedInUser.is_root || loggedInUser.is_admin || loggedInUser._id === user._id) && user._id > 0)
   p
     a(href='/user/#{user._id}/remove') Delete Account 

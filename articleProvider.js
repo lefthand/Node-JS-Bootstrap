@@ -19,13 +19,26 @@ ArticleProvider.prototype.findAll = function(callback) {
   this.getCollection(function(error, user_collection) {
     if( error ) callback(error)
     else {
-      user_collection.find().toArray(function(error, results) {
+      user_collection.find().sort({name:1}).toArray(function(error, results) {
         if( error ) callback(error)
         else callback( null, results)
       });
     }
   });
 };
+
+ArticleProvider.prototype.find = function(query, callback) {
+  this.getCollection(function(error, user_collection) {
+    if( error ) callback(error)
+    else {
+      user_collection.find(query).toArray(function(error, results) {
+        if( error ) callback(error)
+        else callback( null, results)
+      });
+    }
+  });
+};
+
 
 ArticleProvider.prototype.findById = function(id, callback) {
   this.getCollection(function(error, user_collection) {
