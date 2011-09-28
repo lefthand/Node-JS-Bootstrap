@@ -166,7 +166,7 @@ app.get('/users', loadUser, function(req, res){
 
 app.get('/user/:id/edit', loadUser, function(req, res, next){
   if (req.meOrAdmin) {
-    localScripts = '$(document).ready(function(){$(\'#userForm\').validate();});';
+    localScripts = '$(document).ready(function(){$(\'#userForm\').validate({rules:{name:{required:true,min:4}}});});';
     userProvider.findById(req.params.id, function(error, user) {
       res.render('users/edit', { user: user, title: 'User ' + req.params.id, loggedInUser:req.user });
     });
@@ -199,8 +199,52 @@ app.get('/user/:id/remove', loadUser, function(req, res, next){
 });
 
 app.get('/user/create', loadUser, function(req, res, next){
-  localScripts = '$(document).ready(function(){$(\'#userForm\').validate();});';
+  localScripts = '$(document).ready(function(){$(\'#userForm\').validate({rules:{name:{required:true}},messages:{username:{remote: jQuery.format(\'{0} is already in use\')},email:{remote: jQuery.format(\'{0} is already in use\')}}});});';
   res.render('users/create', { title: 'New User', user: {_id:'',username:'',name:'',email:''}, loggedInUser:req.user });
+});
+
+app.get('/users/validate/username/', loadUser, function(req, res){
+  result = '';
+  username = req.param('username');
+  if (username) {
+    console.log('Username! ' + username);
+    userProvider.findOne({username: username}, function (error, user) {
+      if (user) {
+        result = 'false';
+      }
+      else {
+        result = 'true';
+      }
+      res.render('validate.jade', {layout:false, result: result});
+    });
+  }
+  else {
+    result = 'false';
+    console.log('Nothing');
+    res.render('validate.jade', {layout:false, result: result});
+  }
+});
+
+app.get('/users/validate/email/', loadUser, function(req, res){
+  result = '';
+  email = req.param('email');
+  if (email) {
+    console.log('Email! ' + email);
+    userProvider.findOne({email: email}, function (error, user) {
+      if (user) {
+        result = 'false';
+      }
+      else {
+        result = 'true';
+      }
+      res.render('validate.jade', {layout:false, result: result});
+    });
+  }
+  else {
+    result = 'false';
+    console.log('Nothing');
+    res.render('validate.jade', {layout:false, result: result});
+  }
 });
 
 app.post('/user/submit/0?', loadUser, function(req, res, next){
