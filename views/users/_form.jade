@@ -1,14 +1,14 @@
 form(method='POST', action='/user/submit/#{user._id}', id='userForm')
   p Name:
-    input(value='#{user.name}', name='name')
+    input(value='#{user.name}', name='name', class='required')
   p Username:
-    input(value='#{user.username}', name='username', class='required', remote='/users/validate/username/')
+    input(value='#{user.username}', name='username', class='required')
   p Email:
-    input(value='#{user.email}', name='email', class='required email', remote='/users/validate/email/')
+    input(value='#{user.email}', name='email', class='required email')
   p Password:
-    input(type='password', name='password')
+    input(type='password', id='password', name='password', minlength='5')
   p Confirm Password:
-    input(type='password', name='password_confirm')
+    input(type='password', name='password_confirm', equalto='#password')
   -if (loggedInUser.is_root)
     p Is Root:
       input(type='checkbox', checked=user.is_root, name='is_root')

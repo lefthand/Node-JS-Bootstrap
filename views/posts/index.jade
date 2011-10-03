@@ -1,8 +1,12 @@
 h1= title
 h3 Here's the Posts
 p 
-  a(href='/post/add') Add Post
+  a(href='/post/create') Add Post
 p Oh right, here they are:
+ul.posts
+  - each post in posts
+    li
+      a(href='/post/#{post._id}') #{post.title} \n
 //-p Or another way
 //-ul.users
 //-  != partial('user', users);

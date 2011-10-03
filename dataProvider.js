@@ -4,22 +4,22 @@ var MongoProvider = require('./mongoProvider.js').MongoProvider;
 
 var mongoProvider = new MongoProvider('localhost', 27017);
 
-ArticleProvider = function(collection) {
+DataProvider = function(collection) {
   this.collection = collection;
 };
 
-ArticleProvider.prototype.getCollection = function(callback) {
+DataProvider.prototype.getCollection = function(callback) {
   mongoProvider.db.collection(this.collection, function(error, user_collection) {
     if( error ) callback(error);
     else callback(null, user_collection);
   });
 }
 
-ArticleProvider.prototype.findAll = function(callback) {
+DataProvider.prototype.findAll = function(callback,sort) {
   this.getCollection(function(error, user_collection) {
     if( error ) callback(error)
     else {
-      user_collection.find().sort({name:1}).toArray(function(error, results) {
+      user_collection.find().sort(sort).toArray(function(error, results) {
         if( error ) callback(error)
         else callback( null, results)
       });
@@ -27,7 +27,7 @@ ArticleProvider.prototype.findAll = function(callback) {
   });
 };
 
-ArticleProvider.prototype.find = function(query, callback) {
+DataProvider.prototype.find = function(query, callback) {
   this.getCollection(function(error, user_collection) {
     if( error ) callback(error)
     else {
@@ -40,7 +40,7 @@ ArticleProvider.prototype.find = function(query, callback) {
 };
 
 
-ArticleProvider.prototype.findById = function(id, callback) {
+DataProvider.prototype.findById = function(id, callback) {
   this.getCollection(function(error, user_collection) {
     if( error ) callback(error)
     else {
@@ -52,11 +52,12 @@ ArticleProvider.prototype.findById = function(id, callback) {
   });
 }
 
-ArticleProvider.prototype.findBy_Id = function(id, callback) {
+DataProvider.prototype.findBy_Id = function(id, callback) {
   this.getCollection(function(error, user_collection) {
     if( error ) callback(error)
     else {
-      user_collection.findOne({_id: user_collection.db.bson_serializer.ObjectID.createFromHexString(id)}, function(error, result) {
+      _id = user_collection.db.bson_serializer.ObjectID.createFromHexString(id);
+      user_collection.findOne({_id: _id}, function(error, result) {
         if( error ) callback(error)
         else callback( null, result)
       });
@@ -64,7 +65,7 @@ ArticleProvider.prototype.findBy_Id = function(id, callback) {
   });
 }
 
-ArticleProvider.prototype.findOne = function(find, callback) {
+DataProvider.prototype.findOne = function(find, callback) {
   this.getCollection(function(error, game_collection) {
     if( error ) callback(error)
     else {
@@ -76,7 +77,7 @@ ArticleProvider.prototype.findOne = function(find, callback) {
   });
 }
 
-ArticleProvider.prototype.getUniqueId = function(id, callback) {
+DataProvider.prototype.getUniqueId = function(id, callback) {
   this.getCollection(function(error, user_collection) {
     if( error ) callback(error)
     else {
@@ -90,7 +91,7 @@ ArticleProvider.prototype.getUniqueId = function(id, callback) {
   });
 }
 
-ArticleProvider.prototype.save = function(users, callback) {
+DataProvider.prototype.save = function(users, callback) {
   this.getCollection(function(error, user_collection) {
     if( error ) callback(error)
     else {
@@ -113,27 +114,33 @@ ArticleProvider.prototype.save = function(users, callback) {
   });
 };
 
-ArticleProvider.prototype.update = function(user, callback) {
+DataProvider.prototype.update = function(update, callback) {
   this.getCollection(function(error, user_collection) {
     if( error ) callback(error)
     else {
-      user.data.modified_at = new Date();
-//      user_collection.update({_id: user_collection.db.bson_serializer.ObjectID.createFromHexString(user._id)}, {$set: user.data}, {multi:true}, function(err) {
-      user_collection.update({_id: parseInt(user._id)}, {$set: user.data}, {multi:true,safe:true}, function(err) {
+      update.data.modified_at = new Date();
+      if (typeof update._id == 'string')  {
+        id = user_collection.db.bson_serializer.ObjectID.createFromHexString(update._id);
+      }
+      else {
+        id = parseInt(user.id);
+      }
+      user_collection.update({_id: id}, {$set: update.data}, {multi:true,safe:true}, function(err) {
           if (err) console.warn(err.message);
-          else console.log('successfully updated: ' + user._id);
-          callback(null, user);
+          else console.log('successfully updated: ' + update.id);
+          callback(null, update);
       });
     }
   });
 };
 
-ArticleProvider.prototype.remove = function(id, callback) {
+DataProvider.prototype.remove = function(id, callback) {
   this.getCollection(function(error, user_collection) {
+    console.log(typeof id);
     if( error ) callback(error)
     else {
-//      user_collection.remove({_id: user_collection.db.bson_serializer.ObjectID.createFromHexString(id)} , function(err) {
-      user_collection.remove({_id: parseInt(id)} , function(err) {
+      _id = parseInt(id);
+      user_collection.remove({_id: _id} , function(err) {
           if (err) console.warn(err.message);
           else console.log('successfully removed: ' + id);
           callback(null, id);
@@ -142,4 +149,18 @@ ArticleProvider.prototype.remove = function(id, callback) {
   });
 };
 
-exports.ArticleProvider = ArticleProvider;
+DataProvider.prototype.removeBy_id = function(_id, callback) {
+  this.getCollection(function(error, user_collection) {
+    if( error ) callback(error)
+    else {
+      _id = user_collection.db.bson_serializer.ObjectID.createFromHexString(_id);
+      user_collection.remove({_id: _id} , function(err) {
+          if (err) console.warn(err.message);
+          else console.log('successfully removed: ' + _id);
+          callback(null, _id);
+      });
+    }
+  });
+};
+
+exports.DataProvider = DataProvider;

@@ -1,6 +1,6 @@
 var express = require('express');
 
-var ArticleProvider = require('./articleProvider.js').ArticleProvider;
+var DataProvider = require('./dataProvider.js').DataProvider;
 var connect = require('express/node_modules/connect');
 var RedisStore = require('connect-redis')(express);
 var sessionStore = new RedisStore();
@@ -43,8 +43,9 @@ app.configure('production', function(){
   app.use(express.errorHandler()); 
 });
 
-var userProvider = new ArticleProvider('users');
-var countProvider = new ArticleProvider('count');
+var userProvider = new DataProvider('users');
+var postProvider = new DataProvider('post');
+var countProvider = new DataProvider('count');
 
 countProvider.getUniqueId('saves', function(error, count) { 
   if (error) {
@@ -57,6 +58,24 @@ client.incr("connections", function (err, reply) {
   console.log("This has been run " + reply + " times!");
 });
 
+function validatePostData(req, callback) {
+  errors = [];
+  data = {};
+  if (!req.param('title')) {
+    errors.push('Title required.');  
+  }
+  if (!req.param('content')) {
+    errors.push('Content required.');  
+  }
+  if (errors.length > 0) {
+    callback(errors);
+  }
+  else {
+    data.title = req.param('title');
+    data.content = req.param('content');
+    callback( null, data);
+  }
+}
 
 function validateUserData(req, callback) {
   errors = [];
@@ -128,13 +147,8 @@ function loadUser(req, res, next) {
   else {
     req.user = {};
   }
-  req.meOrAdmin = false;
-  req.meOrRoot = false;
-  if (req.params.id == req.user._id || req.user.is_root || req.user.is_admin) {
-    req.meOrAdmin = true;
-  }
-  if (req.params.id == req.user._id || req.user.is_root) {
-    req.meOrRoot = true;
+  if (req.user.is_root) {
+    req.is_admin = true;
   }
   next();
 }
@@ -152,21 +166,108 @@ app.get('/about', loadUser, function(req, res){
   });
 });
 
-app.get('/posts', loadUser, function(req, res){
-  userProvider.findAll(function(error, posts) { 
-    res.render('posts', { posts: posts, title: 'Posts', loggedInUser:req.user  });
+app.get('/post/create', loadUser, function(req, res){
+  localScripts = '$(document).ready(function(){$(\'#postForm\').validate();})';
+  res.render('posts/create', { title: 'New Post', post: {_id:'',title:'',content:''}, loggedInUser:req.user });
+});
+
+app.post('/post/submit/0?', loadUser, function(req, res){
+  data = {};
+  validatePostData(req, function (error, data){
+    if (error) {
+      console.log('Errors: ' + error);
+      res.redirect('/post/create/?' + error);
+    }
+    else {
+      data.user_id = req.user._id;
+      postProvider.save( data, function( error, post) {
+        id = post._id;
+        res.redirect('/post/' + id);
+      });
+    }
   });
 });
+
+app.post('/post/submit/:id?', loadUser, function(req, res){
+  data = {};
+  postProvider.findBy_Id(req.params.id, function(error, post) {
+    if (req.is_admin || post.user_id == req.user._id) {
+      validatePostData(req, function (error, data){
+        if (error) {
+          console.log('Errors: ' + error);
+          res.redirect('/post/' + req.params.id + '/edit/?' + error);
+        }
+        else {
+          postProvider.update({
+              _id: req.params.id,
+              data : data
+            }, function( error, post) {
+            res.redirect('/post/' + req.params.id);
+          });
+        }
+      });
+    }
+    else {
+      res.redirect('/');
+    }
+  });
+});
+
+app.get('/post/:id/edit', loadUser, function(req, res, next){
+  localScripts = '$(document).ready(function(){$(\'#postForm\').validate();})';
+  postProvider.findBy_Id(req.params.id, function(error, post) {
+    if (req.is_admin || req.user._id === post.user_id) {
+      res.render('posts/edit', { post: post, title: 'Post ' + req.params.id, loggedInUser:req.user });
+    }
+    else {
+      res.redirect('/post/' + req.params.id);
+    }
+  });
+});
+
+app.get('/post/:id/remove', loadUser, function(req, res, next){
+  if (req.params.id === 'null') {
+    res.redirect('/users');
+  }
+  postProvider.findBy_Id(req.params.id, function(error, post) {
+    if (req.is_admin || req.user._id === post.user_id) {
+      postProvider.removeBy_id(req.params.id, function(error, id){
+        console.log('Deleted post ' + id);
+      });
+      res.redirect('/posts/');
+    }
+    else {
+      res.redirect('/post/' + req.params.id);
+    }
+  });
+});
+
+app.get('/post/:id', loadUser, function(req, res, next){
+  postProvider.findBy_Id(req.params.id, function(error, post) {
+    userProvider.findById(post.user_id, function(error, user) {
+      post.user = user;
+      console.log(JSON.stringify(post));
+      res.render('posts/post', { post: post, title: 'Post ' + req.params.id, loggedInUser:req.user });
+    });
+  });
+});
+
+app.get('/posts', loadUser, function(req, res){
+  postProvider.findAll(function(error, posts) { 
+    res.render('posts', { posts: posts, title: 'Posts', loggedInUser:req.user  });
+  }, {created_at:-1});
+});
+
 
 app.get('/users', loadUser, function(req, res){
   userProvider.findAll(function(error, users) { 
     res.render('users', { users: users, title: 'Users', loggedInUser:req.user });
-  });
+  }, {name:1});
 });
 
 app.get('/user/:id/edit', loadUser, function(req, res, next){
-  if (req.meOrAdmin) {
-    localScripts = '$(document).ready(function(){$(\'#userForm\').validate({rules:{name:{required:true,min:4}}});});';
+  if (req.is_admin || req.params.id == req.user._id) {
+    localScripts = '$(document).ready(function(){$(\'#userForm\').validate({rules:{username:{remote: {url:\'/users/validate/username/\',type:\'post\',data:{user_id:' + req.params.id + '}}},email:{remote: {url:\'/users/validate/email/\',type:\'post\',data:{user_id:' + req.params.id + '}}}},messages:{username:{remote: jQuery.format(\'{0} is already in use\')},email:{remote: jQuery.format(\'{0} is already in use\')}, password_confirm:\'Passwords must match.\'}});});';
     userProvider.findById(req.params.id, function(error, user) {
       res.render('users/edit', { user: user, title: 'User ' + req.params.id, loggedInUser:req.user });
     });
@@ -180,8 +281,7 @@ app.get('/user/:id/remove', loadUser, function(req, res, next){
   if (req.params.id === 'null') {
     res.redirect('/users');
   }
-  // TEST!!!! 
-  if (req.meOrAdmin) {
+  if (req.is_admin || req.params.id == req.user._id) {
     userProvider.remove(req.params.id, function(error, id){
       console.log('Deleted user ' + id);
     });
@@ -199,16 +299,20 @@ app.get('/user/:id/remove', loadUser, function(req, res, next){
 });
 
 app.get('/user/create', loadUser, function(req, res, next){
-  localScripts = '$(document).ready(function(){$(\'#userForm\').validate({rules:{name:{required:true}},messages:{username:{remote: jQuery.format(\'{0} is already in use\')},email:{remote: jQuery.format(\'{0} is already in use\')}}});});';
+  localScripts = '$(document).ready(function(){$(\'#userForm\').validate({rules:{password:{required:true},username:{remote: {url:\'/users/validate/username/\',type:\'post\'}},email:{remote: {url:\'/users/validate/email/\',type:\'post\'}}},messages:{username:{remote: jQuery.format(\'{0} is already in use\')},email:{remote: jQuery.format(\'{0} is already in use\')}, password_confirm:\'Passwords must match.\'}});});';
   res.render('users/create', { title: 'New User', user: {_id:'',username:'',name:'',email:''}, loggedInUser:req.user });
 });
 
-app.get('/users/validate/username/', loadUser, function(req, res){
+app.post('/users/validate/username/', loadUser, function(req, res){
   result = '';
   username = req.param('username');
+  user_id = req.param('user_id');
   if (username) {
     console.log('Username! ' + username);
-    userProvider.findOne({username: username}, function (error, user) {
+    userProvider.findOne({_id: {$ne: parseInt(user_id)},username: username}, function (error, user) {
+      if (error) {
+        console.log('Error! ' + error);
+      }
       if (user) {
         result = 'false';
       }
@@ -225,12 +329,13 @@ app.get('/users/validate/username/', loadUser, function(req, res){
   }
 });
 
-app.get('/users/validate/email/', loadUser, function(req, res){
+app.post('/users/validate/email/', loadUser, function(req, res){
   result = '';
   email = req.param('email');
+  user_id = req.param('user_id');
   if (email) {
     console.log('Email! ' + email);
-    userProvider.findOne({email: email}, function (error, user) {
+    userProvider.findOne({_id: {$ne: parseInt(user_id)},email: email}, function (error, user) {
       if (user) {
         result = 'false';
       }
@@ -266,7 +371,7 @@ app.post('/user/submit/0?', loadUser, function(req, res, next){
 });
 
 app.post('/user/submit/:id', loadUser, function(req, res){
-  if (req.meOrAdmin) {
+  if (req.is_admin || req.params.id == req.user._id) {
     data = {};
     validateUserData(req, function (error, data){
       if (error) {
@@ -275,7 +380,7 @@ app.post('/user/submit/:id', loadUser, function(req, res){
       }
       else {
         userProvider.update({
-          _id: req.params.id,
+          id: req.params.id,
           data : data
         }, function( error, docs) {
           res.redirect('/user/' + req.params.id);
@@ -290,7 +395,9 @@ app.post('/user/submit/:id', loadUser, function(req, res){
 
 app.get('/user/:id', loadUser, function(req, res, next){
   userProvider.findById(req.params.id, function(error, user) {
-    res.render('users/user', { user: user, title: 'User ' + req.params.id, loggedInUser:req.user });
+    postProvider.find({user_id:user._id}, function(error, posts) {
+      res.render('users/user', { user: user, posts:posts, title: 'User ' + req.params.id, loggedInUser:req.user });
+    });
   });
 });
 

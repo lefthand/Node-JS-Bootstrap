@@ -1,0 +1,8 @@
+form(method='POST', action='/post/submit/#{post._id}', id='postForm')
+  p Title:
+    input(value='#{post.title}', name='title', class='required')
+  p Content:
+    textarea(name='content', class='required')
+      #{post.content}
+  p
+    input(type='submit', value='Submit')

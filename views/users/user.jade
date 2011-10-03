@@ -13,3 +13,8 @@ p Email: #{user.email}
     a(href='/user/#{user._id}/edit/') Edit User
 p Image:
   img(src='http://static1.robohash.com/#{user.name}')
+h3 Posts by this user
+ul.posts
+  - each post in posts
+    li
+      a(href='/post/#{post._id}') #{post.title} \n
