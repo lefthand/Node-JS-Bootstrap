@@ -18,11 +18,14 @@ html(lang="en")
           li
             a(href="/") Home
           li
+            a(href="/posts") Posts
+          li
             a(href="/users") Users
           li
             a(href="/about") About
-          li
-            a(href="/posts") Posts
+          -if (loggedInUser.is_admin)
+            li
+              a(href="/admin") Admin
       != partial('login');
     section!= body
     footer

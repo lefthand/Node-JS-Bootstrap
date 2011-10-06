@@ -45,6 +45,7 @@ app.configure('production', function(){
 
 var userProvider = new DataProvider('users');
 var postProvider = new DataProvider('post');
+var categoryProvider = new DataProvider('category');
 var countProvider = new DataProvider('count');
 
 countProvider.getUniqueId('saves', function(error, count) { 
@@ -164,6 +165,50 @@ app.get('/about', loadUser, function(req, res){
   res.render('about', {
     title: 'About', loggedInUser:req.user 
   });
+});
+
+app.get('/admin', loadUser, function(req, res){
+  if (req.is_admin) {
+    localScripts = '$(document).ready(function(){$(\'#categoryForm\').validate();})';
+    categoryProvider.findAll(function(error, categories) {
+      res.render('admin', {
+        title: 'Admin', loggedInUser:req.user, categories:categories
+      });
+    },{name:1});
+  }
+  else {
+    res.redirect('/');
+  }
+});
+
+app.post('/admin/category/submit', loadUser, function(req, res){
+  if (req.is_admin) {
+    data = {};
+    data.name = req.param('name');
+    categoryProvider.save(data, function(error, category) {
+      res.redirect('/admin/');
+    });
+  }
+  else {
+    res.redirect('/');
+  }
+});
+
+app.get('/admin/category/:id/remove', loadUser, function(req, res, next){
+  if (req.params.id === 'null') {
+    res.redirect('/admin');
+  }
+  if (req.is_admin) {
+    categoryProvider.removeBy_id(req.params.id, function(error, id){
+      if (error) {
+        console.log('Could not delete category ' + id);
+      }
+    });
+    res.redirect('/admin/');
+  }
+  else {
+    res.redirect('/post/' + req.params.id);
+  }
 });
 
 app.get('/post/create', loadUser, function(req, res){

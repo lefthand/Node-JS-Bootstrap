@@ -1,0 +1,17 @@
+h1= title
+h3 Do your funky little admin thing 
+p Go ahead, administrate something
+p 
+  a(href='/user/create') Add User
+div 
+  h3 Categories
+    - each category in categories
+      li\n
+         #{category.name}
+         a(href='/admin/category/#{category._id}/remove') (Remove)
+  h5 Add a Category
+  form(method='POST', action='/admin/category/submit/', id='categoryForm')
+    p Name:
+      input(name='name', class='required')
+    p
+      input(type='submit', value='Save')
