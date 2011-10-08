@@ -1,8 +1,19 @@
 form(method='POST', action='/post/submit/#{post._id}', id='postForm')
-  p Title:
-    input(value='#{post.title}', name='title', class='required')
-  p Content:
-    textarea(name='content', class='required')
+  p
+    label(for="title") Title:
+    input(value='#{post.title}', id='title', name='title', class='required')
+  p
+    label(for="category") Category:
+    select(name="category", id="category")
+      option(value="#{post.category}") -- Select Category #{post.category} --
+      - each category in categories
+        - if (category.name === post.category)
+          option(value="#{category.name}", selected="selected") #{category.name}
+        - else
+          option(value="#{category.name}") #{category.name}
+  p
+    label(for="content") Content:
+    textarea(name='content', id='content', class='required')
       #{post.content}
   p
     input(type='submit', value='Submit')

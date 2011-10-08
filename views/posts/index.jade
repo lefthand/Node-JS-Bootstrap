@@ -3,17 +3,19 @@ h3 Here's the Posts
 p 
   a(href='/post/create') Add Post
 p Oh right, here they are:
-ul.posts
+table.posts
+  tr
+    th Title
+    th Category
+    th User
+    th Created
   - each post in posts
-    li
-      a(href='/post/#{post._id}') #{post.title} \n
-//-p Or another way
-//-ul.users
-//-  != partial('user', users);
-//-p Or a third way
-//-ul.users
-//-  != partial('userGlobal', {collection: users, as: global});
-//-p Or a forth way
-//-ul.users
-//-  != partial('userPerson', {collection: users, as: 'person'});
+    - date = new Date(post.created_at)
+    - postDate= date.toDateString()
+    tr
+      td
+        a(href='/post/#{post._id}') #{post.title} \n
+      td= post.category
+      td= post.user_id
+      td= postDate
 

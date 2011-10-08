@@ -27,11 +27,11 @@ DataProvider.prototype.findAll = function(callback,sort) {
   });
 };
 
-DataProvider.prototype.find = function(query, callback) {
+DataProvider.prototype.find = function(query, callback,sort) {
   this.getCollection(function(error, user_collection) {
     if( error ) callback(error)
     else {
-      user_collection.find(query).toArray(function(error, results) {
+      user_collection.find(query).sort(sort).toArray(function(error, results) {
         if( error ) callback(error)
         else callback( null, results)
       });

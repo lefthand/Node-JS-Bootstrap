@@ -74,6 +74,7 @@ function validatePostData(req, callback) {
   else {
     data.title = req.param('title');
     data.content = req.param('content');
+    data.category = req.param('category');
     callback( null, data);
   }
 }
@@ -213,8 +214,25 @@ app.get('/admin/category/:id/remove', loadUser, function(req, res, next){
 
 app.get('/post/create', loadUser, function(req, res){
   localScripts = '$(document).ready(function(){$(\'#postForm\').validate();})';
-  res.render('posts/create', { title: 'New Post', post: {_id:'',title:'',content:''}, loggedInUser:req.user });
+  categoryProvider.findAll(function(error, categories) {
+    res.render('posts/create', { title: 'New Post', post: {_id:'',title:'',category:'',content:''}, categories: categories, loggedInUser: req.user });
+  }, {name:1});
 });
+
+app.get('/post/:id/edit', loadUser, function(req, res, next){
+  localScripts = '$(document).ready(function(){$(\'#postForm\').validate();})';
+  postProvider.findBy_Id(req.params.id, function(error, post) {
+    if (req.is_admin || req.user._id === post.user_id) {
+      categoryProvider.findAll(function(error, categories) {
+        res.render('posts/edit', { title: 'Post ' + post.title, post: post, categories: categories, loggedInUser:req.user });
+      }, {name:1});
+    }
+    else {
+      res.redirect('/post/' + req.params.id);
+    }
+  });
+});
+
 
 app.post('/post/submit/0?', loadUser, function(req, res){
   data = {};
@@ -258,18 +276,6 @@ app.post('/post/submit/:id?', loadUser, function(req, res){
   });
 });
 
-app.get('/post/:id/edit', loadUser, function(req, res, next){
-  localScripts = '$(document).ready(function(){$(\'#postForm\').validate();})';
-  postProvider.findBy_Id(req.params.id, function(error, post) {
-    if (req.is_admin || req.user._id === post.user_id) {
-      res.render('posts/edit', { post: post, title: 'Post ' + req.params.id, loggedInUser:req.user });
-    }
-    else {
-      res.redirect('/post/' + req.params.id);
-    }
-  });
-});
-
 app.get('/post/:id/remove', loadUser, function(req, res, next){
   if (req.params.id === 'null') {
     res.redirect('/users');
@@ -292,7 +298,7 @@ app.get('/post/:id', loadUser, function(req, res, next){
     userProvider.findById(post.user_id, function(error, user) {
       post.user = user;
       console.log(JSON.stringify(post));
-      res.render('posts/post', { post: post, title: 'Post ' + req.params.id, loggedInUser:req.user });
+      res.render('posts/post', { post: post, title: 'Post > ' + post.title, loggedInUser:req.user });
     });
   });
 });
@@ -442,7 +448,7 @@ app.get('/user/:id', loadUser, function(req, res, next){
   userProvider.findById(req.params.id, function(error, user) {
     postProvider.find({user_id:user._id}, function(error, posts) {
       res.render('users/user', { user: user, posts:posts, title: 'User ' + req.params.id, loggedInUser:req.user });
-    });
+    },{created_at:-1});
   });
 });
 

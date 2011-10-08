@@ -9,9 +9,7 @@ div
       li\n
          #{category.name}
          a(href='/admin/category/#{category._id}/remove') (Remove)
-  h5 Add a Category
   form(method='POST', action='/admin/category/submit/', id='categoryForm')
-    p Name:
-      input(name='name', class='required')
     p
-      input(type='submit', value='Save')
+      input(name='name', class='required')
+      input(type='submit', value='Add Category')

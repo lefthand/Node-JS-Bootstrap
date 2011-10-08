@@ -22,21 +22,19 @@ Goals
 -  User list and detail available to all - DONE
 -  Users can log in and log out - DONE
 -  Users can choose to remain logged in indefinitely - DONE
--  A generic 'post' can be add
+-  A generic 'post' can be add - DONE
 -  If the user is not logged in when posting, a basic account is created
 -  The basic account cannot log in
 -  If a user posts with an email address of an existing account, they must log in
--  Users can edit or delete their posts
--  Admin can edit or delete any post
--  Post list and detail page available to all
--  Users can message other users
+-  Users can edit or delete their posts - DONE
+-  Admin can edit or delete any post - DONE
+-  Post list and detail page available to all - DONE
 -  Users can respond to other user posts
--  Users can respond to messages
 -  Post list page creates persistent connection 
 -  New posts are automatically pushed to users
--  Both in line and post submit verification of data
+-  Both in line and post submit verification of data - DONE
 -  Passwords are hased and secure - DONE
--  Vows need to be used as much as possible
+-  Vows need to be used
 
 
  
