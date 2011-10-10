@@ -2,7 +2,14 @@ h1= title
 h3 Here's the Posts
 p 
   a(href='/post/create') Add Post
-p Oh right, here they are:
+p
+  h3 Categories
+  ul.categories
+   - each category in categories
+     li 
+       a(href='/posts/?category=#{category.name}') #{category.name}
+   li
+     a(href='/posts/') All Posts
 table.posts
   tr
     th Title
@@ -16,6 +23,6 @@ table.posts
       td
         a(href='/post/#{post._id}') #{post.title} \n
       td= post.category
-      td= post.user_id
+      td= postUsers[post.user_id]
       td= postDate
 

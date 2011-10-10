@@ -2,6 +2,10 @@ form(method='POST', action='/post/submit/#{post._id}', id='postForm')
   p
     label(for="title") Title:
     input(value='#{post.title}', id='title', name='title', class='required')
+  - if (!loggedInUser._id && !post._id)
+    p
+      label(for="email_address") Email Address:
+      input(value='', id='email_address', name='email_address', class='required email')
   p
     label(for="category") Category:
     select(name="category", id="category")

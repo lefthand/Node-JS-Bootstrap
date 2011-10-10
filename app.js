@@ -43,6 +43,17 @@ app.configure('production', function(){
   app.use(express.errorHandler()); 
 });
 
+Array.prototype.unique = function() {
+  var o = {}, i, l = this.length, r = [];
+  for(i=0; i<l;i+=1) o[this[i]] = this[i];
+  for(i in o) {
+    if (o[i]) {
+      r.push(o[i]);
+    }
+  }
+  return r;
+};
+
 var userProvider = new DataProvider('users');
 var postProvider = new DataProvider('post');
 var categoryProvider = new DataProvider('category');
@@ -75,7 +86,34 @@ function validatePostData(req, callback) {
     data.title = req.param('title');
     data.content = req.param('content');
     data.category = req.param('category');
-    callback( null, data);
+    if (!req.user._id && !req.param('_id')) {
+      if (!req.param('email_address')) {
+        callback('Email address required.');
+      }
+      else {
+        userProvider.findOne({email: req.param('email_address')}, function( error, user) {
+          if (user && user.username) {
+            callback('Please log in to post with this email address.');
+          }
+          else if (user && !user.username) {
+            data.user_id = user._id;
+            callback( null, data);
+          }
+          else {
+            newUserInfo = {email: req.param('email_address')};
+            countProvider.getUniqueId('users', function(error, id) {
+              newUserInfo._id = id;
+              data.user_id = id;
+              userProvider.save( newUserInfo );
+              callback( null, data);
+            });
+          }
+        });
+      }
+    }
+    else {
+      callback( null, data);
+    }
   }
 }
 
@@ -213,7 +251,7 @@ app.get('/admin/category/:id/remove', loadUser, function(req, res, next){
 });
 
 app.get('/post/create', loadUser, function(req, res){
-  localScripts = '$(document).ready(function(){$(\'#postForm\').validate();})';
+  localScripts = '$(document).ready(function(){$(\'#postForm\').validate({rules:{email_address:{remote: {url:\'/post/validate/email/\',type:\'post\'}}}});})';
   categoryProvider.findAll(function(error, categories) {
     res.render('posts/create', { title: 'New Post', post: {_id:'',title:'',category:'',content:''}, categories: categories, loggedInUser: req.user });
   }, {name:1});
@@ -242,7 +280,9 @@ app.post('/post/submit/0?', loadUser, function(req, res){
       res.redirect('/post/create/?' + error);
     }
     else {
-      data.user_id = req.user._id;
+      if (!data.user_id) {
+        data.user_id = req.user._id;
+      }
       postProvider.save( data, function( error, post) {
         id = post._id;
         res.redirect('/post/' + id);
@@ -297,16 +337,56 @@ app.get('/post/:id', loadUser, function(req, res, next){
   postProvider.findBy_Id(req.params.id, function(error, post) {
     userProvider.findById(post.user_id, function(error, user) {
       post.user = user;
-      console.log(JSON.stringify(post));
       res.render('posts/post', { post: post, title: 'Post > ' + post.title, loggedInUser:req.user });
     });
   });
 });
 
 app.get('/posts', loadUser, function(req, res){
-  postProvider.findAll(function(error, posts) { 
-    res.render('posts', { posts: posts, title: 'Posts', loggedInUser:req.user  });
+  find = {};
+  if (req.param('category')) {
+    find = {category: req.param('category')};
+  }
+  postProvider.find(find, function(error, posts) { 
+    postUsers = {};
+    postUserIds = [];
+    for (var i in posts) {
+      postUserIds.push(posts[i].user_id);
+    }
+    postUserIds = postUserIds.unique();
+    userProvider.find({_id: {$in: postUserIds}}, function(error, users) {
+      postUsers = [];
+      for (var i in users) {
+        if (users[i]._id) {
+          postUsers[users[i]._id] = users[i].name;
+        }
+      }
+      categoryProvider.findAll(function(error, categories) {
+        res.render('posts', { title: 'Posts', posts: posts, categories: categories, postUsers: postUsers, loggedInUser:req.user  });
+      });
+    });
   }, {created_at:-1});
+});
+
+app.post('/post/validate/email/', loadUser, function(req, res){
+  result = '';
+  email = req.param('email_address');
+  if (email) {
+    userProvider.findOne({username: {$ne: null},email: email}, function (error, user) {
+      if (user) {
+        result = 'false';
+      }
+      else {
+        result = 'true';
+      }
+      res.render('validate.jade', {layout:false, result: result});
+    });
+  }
+  else {
+    result = 'false';
+    console.log('Nothing');
+    res.render('validate.jade', {layout:false, result: result});
+  }
 });
 
 
@@ -477,6 +557,9 @@ app.post('/login', loadUser, function(req, res){
       }
       res.redirect('back');
     });
+  }
+  else {
+    res.redirect('back');
   }
 });
 

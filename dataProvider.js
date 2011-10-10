@@ -93,7 +93,7 @@ DataProvider.prototype.getUniqueId = function(id, callback) {
 
 DataProvider.prototype.save = function(users, callback) {
   this.getCollection(function(error, user_collection) {
-    if( error ) callback(error)
+    if( error && callback ) callback(error)
     else {
       if (typeof(users.length) == "undefined") {
         users = [users];
@@ -106,7 +106,9 @@ DataProvider.prototype.save = function(users, callback) {
           user._id = user.id;
         }
         user_collection.save(user, function() {
-          callback(null, user);
+          if (callback) {
+            callback(null, user);
+          }
         });
       }
 

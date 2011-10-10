@@ -3,8 +3,9 @@ h3 Here's the post
 p Title: #{post.title}
 p Content: #{post.content}
 p Category: #{post.category}
-p By: 
-  a(href='/user/#{post.user_id}') #{post.user.username}
+-if (post.user && post.user.username)
+  p By: 
+    a(href='/user/#{post.user_id}') #{post.user.username}
 -if (loggedInUser.is_admin || loggedInUser.is_root || loggedInUser._id === post.user_id)
   p 
     a(href='/post/#{post._id}/edit/') Edit Post

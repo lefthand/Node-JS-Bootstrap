@@ -4,12 +4,13 @@ Stack
 =====
 
 -  node.js
--  mongodb
 -  express
 -  jade
--  bcrypt
+-  mongodb
 -  connect-redis
+-  bcrypt
 -  socket.io
+-  jquery
 
 Goals
 =====
@@ -23,17 +24,15 @@ Goals
 -  Users can log in and log out - DONE
 -  Users can choose to remain logged in indefinitely - DONE
 -  A generic 'post' can be add - DONE
--  If the user is not logged in when posting, a basic account is created
--  The basic account cannot log in
--  If a user posts with an email address of an existing account, they must log in
+-  If the user is not logged in when posting, a basic account is created - DONE
+-  The basic account cannot log in - DONE
+-  If a user posts with an email address of an existing account, they must log in - DONE
 -  Users can edit or delete their posts - DONE
 -  Admin can edit or delete any post - DONE
 -  Post list and detail page available to all - DONE
--  Users can respond to other user posts
--  Post list page creates persistent connection 
--  New posts are automatically pushed to users
 -  Both in line and post submit verification of data - DONE
--  Passwords are hased and secure - DONE
+-  Passwords are hashed and secure - DONE
+-  New posts are automatically pushed to users
 -  Vows need to be used
 
 

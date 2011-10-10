@@ -1,12 +1,15 @@
 - if (!loggedInUser.username)
   p Let's log in!
   form(method='POST', action='/login')
-    p Username:
-        input(name='username')
-    p Password:
-      input(name='password', type='password')
-    p Remember Me:
-      input(name='remember', type='checkbox')
+    p
+      label(for="username") Username:
+      input(name='username', id='username')
+    p
+      label(for="password") Password:
+      input(name='password', id='password', type='password')
+    p 
+      label(for="remember") Remember Me?
+      input(name='remember', id='remember', type='checkbox')
     p
       input(type='submit', value='Log In')
 - else
