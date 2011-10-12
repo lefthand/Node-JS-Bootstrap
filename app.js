@@ -15,6 +15,7 @@ client.on("error", function (err) {
     console.log("Error " + err);
 });
 var app = module.exports = express.createServer();
+var io = require('socket.io').listen(app); 
 
 // = Configuration
 
@@ -58,6 +59,7 @@ var userProvider = new DataProvider('users');
 var postProvider = new DataProvider('post');
 var categoryProvider = new DataProvider('category');
 var countProvider = new DataProvider('count');
+var chatProvider = new DataProvider('chat');
 
 countProvider.getUniqueId('saves', function(error, count) { 
   if (error) {
@@ -163,12 +165,20 @@ function validateUserData(req, callback) {
             if (users[i].username == req.param('username')) {
               errors.push('Username already taken.');  
             }
-            if (users[i].email == req.param('email')) {
+            if (users[i].email == req.param('email') && users[i].username) {
               errors.push('Email Address already taken.');  
+            }
+            else if (users[i].email == req.param('email')  && !users[i].username) {
+              data._id = users[i]._id;
             }
           }
         }
-        callback(errors);
+        if (errors.length == 0) {
+          callback( null, data);
+        }
+        else {
+          callback(errors);
+        }
       }
       else {
         callback( null, data);
@@ -197,6 +207,25 @@ function loadUser(req, res, next) {
 app.get('/', loadUser, function(req, res){
   res.render('index', {
     title: 'Fun', loggedInUser:req.user 
+  });
+});
+
+app.get('/listen', loadUser, function(req, res){
+  res.render('listen', {layout:false});
+});
+
+io.sockets.on('connection', function (socket) {
+  chatProvider.findAll(function(error, lines) {
+    for (var i in lines) {
+      message = lines[i].line;
+      socket.emit('repeat', { youSaid: message });
+    }
+  
+  }); 
+  socket.on('user message', function (data) {
+    socket.broadcast.emit('repeat', { youSaid: data });
+    socket.emit('repeat', { youSaid: data });
+    chatProvider.save({line: data}); 
   });
 });
 
@@ -391,7 +420,7 @@ app.post('/post/validate/email/', loadUser, function(req, res){
 
 
 app.get('/users', loadUser, function(req, res){
-  userProvider.findAll(function(error, users) { 
+  userProvider.find({username: {$ne:null}}, function(error, users) { 
     res.render('users', { users: users, title: 'Users', loggedInUser:req.user });
   }, {name:1});
 });
@@ -466,7 +495,7 @@ app.post('/users/validate/email/', loadUser, function(req, res){
   user_id = req.param('user_id');
   if (email) {
     console.log('Email! ' + email);
-    userProvider.findOne({_id: {$ne: parseInt(user_id)},email: email}, function (error, user) {
+    userProvider.findOne({_id: {$ne: parseInt(user_id)}, username: {$ne: null},email: email}, function (error, user) {
       if (user) {
         result = 'false';
       }
@@ -491,12 +520,19 @@ app.post('/user/submit/0?', loadUser, function(req, res, next){
       res.redirect('/user/create/?' + error);
     }
     else {
-      countProvider.getUniqueId('users', function(error, id) {
-        data._id = id;
-        userProvider.save( data, function( error, docs) {
-          res.redirect('/user/' + id);
+      if (!data._id) {
+        countProvider.getUniqueId('users', function(error, id) {
+          data._id = id;
+          userProvider.save( data, function( error, docs) {
+            res.redirect('/user/' + id);
+          });
         });
-      });
+      }
+      else {
+        userProvider.save( data, function( error, docs) {
+          res.redirect('/user/' + data._id);
+        });
+      }
     }
   });
 });
@@ -533,13 +569,13 @@ app.get('/user/:id', loadUser, function(req, res, next){
 });
 
 app.post('/login', loadUser, function(req, res){
-  if (req.param('username') && req.param('password')) {
+  if (req.param('username') && req.param('passwordLogin')) {
     userProvider.findOne({username: req.param('username')}, function (error, user) {
       if (error || !user) {
         console.log('Couldn\'t find user! ' + req.param('username'));
       }
       else {
-        if (bcrypt.compare_sync(req.param('password'), user.password)) {
+        if (bcrypt.compare_sync(req.param('passwordLogin'), user.password)) {
           if (req.session) {
             console.log('Someone logged in! ' + req.param('username') + ' ' + user._id);
             req.session.user = user;

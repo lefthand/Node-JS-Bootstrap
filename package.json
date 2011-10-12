@@ -6,8 +6,9 @@
       "express": "latest"
     , "stylus": "latest"
     , "jade": "latest"
-    , "mongodb": "0.9.6-9"
+    , "mongodb": "latest"
     , "bcrypt": "latest"
     , "connect-redis": "latest"
+    , "socket.io": "latest"
   }
 }

@@ -1,0 +1,31 @@
+doctype 5
+html
+  head
+    script(src='http://code.jquery.com/jquery-1.6.4.min.js')
+    script(src='/socket.io/socket.io.js')
+    script
+      var socket = io.connect('http://localhost:3000');
+      socket.on('repeat', function (data) {
+        console.log(data);
+        $('#lines').append($('<p>').append($('<em>').text(data.youSaid)));
+      });
+      // dom manipulation
+      $(function () {
+        $('#send-message').submit(function () {
+          socket.emit('user message', $('#message').val());
+          clear();
+          return false;
+        });
+
+        function clear () {
+          $('#message').val('').focus();
+        };
+      });
+  body
+    #hello
+      h1 Hello
+      #lines
+      form#send-message
+        input#message
+        button Send
+

@@ -1,19 +1,26 @@
 form(method='POST', action='/user/submit/#{user._id}', id='userForm')
-  p Name:
+  p  
+    label(for="name") Name:
     input(value='#{user.name}', name='name', class='required')
-  p Username:
+  p 
+    label(for="username") Username:
     input(value='#{user.username}', name='username', class='required')
-  p Email:
+  p
+    label(for="email") Email:
     input(value='#{user.email}', name='email', class='required email')
-  p Password:
+  p
+    label(for="password") Password:
     input(type='password', id='password', name='password', minlength='5')
-  p Confirm Password:
-    input(type='password', name='password_confirm', equalto='#password')
+  p 
+    label(for="password_confirm") Confirm Password:
+    input(type='password', name='password_confirm', id="password_confirm", equalto='#password')
   -if (loggedInUser.is_root)
-    p Is Root:
-      input(type='checkbox', checked=user.is_root, name='is_root')
-    p Is Admin:
-      input(type='checkbox', checked=user.is_admin, name='is_admin')
+    p 
+      label(for="is_root") Is Root:
+      input(type='checkbox', checked=user.is_root, name='is_root', id='is_root')
+    p 
+      label(for="is_admin") Is Admin:
+      input(type='checkbox', checked=user.is_admin, name='is_admin', id='is_admin')
   p
     input(type='submit', value='Save')
 -if ((loggedInUser.is_root || loggedInUser.is_admin || loggedInUser._id === user._id) && user._id > 0)

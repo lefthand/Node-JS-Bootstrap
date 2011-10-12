@@ -33,7 +33,7 @@ var MongoReply = exports.MongoReply = function(db, binary_reply) {
   // Unpack the number of objects returned
   this.numberReturned = binary_reply[index] | binary_reply[index + 1] << 8 | binary_reply[index + 2] << 16 | binary_reply[index + 3] << 24;
   index = index + 4;
-  
+
   // Let's unpack all the bson document, deserialize them and store them
   for(var object_index = 0; object_index < this.numberReturned; object_index++) {
     // Read the size of the bson object    
@@ -42,7 +42,7 @@ var MongoReply = exports.MongoReply = function(db, binary_reply) {
     this.documents.push(db.bson_deserializer.BSON.deserialize(binary_reply.slice(index, index + bsonObjectSize)));
     // Adjust binary index to point to next block of binary bson data
     index = index + bsonObjectSize;
-  }    
+  }        
 };
 
 MongoReply.prototype.is_error = function(){
