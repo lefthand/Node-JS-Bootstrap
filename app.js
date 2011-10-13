@@ -43,6 +43,24 @@ app.configure('development', function(){
 app.configure('production', function(){
   app.use(express.errorHandler()); 
 });
+   
+io.set('authorization', function (data, accept) {
+  if (data.headers.cookie) {
+    data.cookie = parseCookie(data.headers.cookie);
+    data.sessionID = data.cookie['my.sid'];
+    data.sessionStore = sessionStore;
+    sessionStore.get(data.sessionID, function (err, session) {
+      if (err) {
+        accept(err.message, false);
+      } else {
+        data.session = new Session(data, session);
+        accept(null, true);
+      }
+    });
+  } else {
+    return accept('No cookie transmitted.', false);
+  }
+});
 
 Array.prototype.unique = function() {
   var o = {}, i, l = this.length, r = [];
@@ -211,10 +229,17 @@ app.get('/', loadUser, function(req, res){
 });
 
 app.get('/listen', loadUser, function(req, res){
+  console.log('Listen Session: ' + JSON.stringify(req.session));
   res.render('listen', {layout:false});
 });
 
 io.sockets.on('connection', function (socket) {
+  var hs = socket.handshake; 
+  hs.session.info = {IConnected:'And all I got was this lousy status message.'}
+  hs.session.touch().save();
+  console.log('A socket with sessionID ' + hs.sessionID
+        + ' connected!');
+  console.log('A socket with session: ' + JSON.stringify(hs.session));
   chatProvider.findAll(function(error, lines) {
     for (var i in lines) {
       message = lines[i].line;
@@ -224,7 +249,6 @@ io.sockets.on('connection', function (socket) {
   }); 
   socket.on('user message', function (data) {
     socket.broadcast.emit('repeat', { youSaid: data });
-    socket.emit('repeat', { youSaid: data });
     chatProvider.save({line: data}); 
   });
 });

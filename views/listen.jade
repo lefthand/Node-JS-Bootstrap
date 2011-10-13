@@ -1,6 +1,7 @@
 doctype 5
 html
   head
+    title Listen
     script(src='http://code.jquery.com/jquery-1.6.4.min.js')
     script(src='/socket.io/socket.io.js')
     script
@@ -13,6 +14,8 @@ html
       $(function () {
         $('#send-message').submit(function () {
           socket.emit('user message', $('#message').val());
+          message('System', 'Message Sent' + $('#message').val());
+          $('#lines').append($('<p>').append($('<em>').text($('#message').val())));
           clear();
           return false;
         });
