@@ -1,7 +1,137 @@
+* {
+  padding: 0;
+  margin: 0;
+}
 body {
-  padding: 50px;
   font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+  width: 1024px;
+  margin: 10px 0 10px 30px;
 }
 a {
   color: #00b7ff;
+}
+header {
+  float: left;
+  width: 1004px;
+  padding: 10px;
+  margin-bottom: 20px;
+  background: #fdf;
+  clear: both;
+}
+nav {
+  margin-right: 200px;
+  float: left;
+}
+nav li {
+  float: left;
+  list-style: none;
+  margin-right: 10px;
+}
+#login {
+  float: right;
+}
+#login form {
+  float: left;
+}
+#login p {
+  float: left;
+  margin-right: 10px;
+}
+#login input {
+  width: 100px;
+}
+#login label {
+  margin-right: 5px;
+}
+#login input#submit {
+  width: 50px;
+}
+section {
+  float: left;
+}
+section#content {
+  width: 740px;
+  background: #dfd;
+  padding: 15px 20px 5px;
+}
+section#sidebar {
+  width: 214px;
+  background: #dfd;
+  margin-left: 20px;
+  padding: 20px 5px;
+}
+section#content p {
+  margin: 15px 5px;
+}
+section h1 {
+  font-size: 35px;
+  color: #040;
+  width: 600px;
+  float: left;
+}
+section h3 {
+  margin: 15px 0;
+  font-size: 25px;
+  color: #004;
+  clear: both;
+}
+section h4 {
+  margin: 10px 0;
+  font-size: 20px;
+  color: #400;
+}
+footer {
+  float: left;
+  width: 1024px;
+  padding: 10px;
+  margin-top: 20px;
+  background: #fdf;
+  clear: both;
+}
+/*******************/
+/***** Sidebar *****/
+/*******************/
+section#sidebar ul {
+  list-style: none;
+}
+section#sidebar li {
+  margin: 5px 0;
+}
+/*******************/
+/* General Content */
+/*******************/
+.actions {
+  float: right;
+  width: 120px;
+}
+.actions ul {
+  list-style: none;
+}
+table.data {
+  width: 100%;
+  border-collapse: collapse;
+}
+table.data th {
+  text-align: left;
+  border-bottom: 3px solid #000;
+  padding: 5px;
+}
+table.data td {
+  padding: 5px;
+  border-top: 1px solid #999;
+}
+/*********/
+/* USERS */
+/*********/
+ul#userMosaic li {
+  float: left;
+  list-style: none;
+  text-align: center;
+}
+ul#userMosaic li a {
+  text-decoration: none;
+}
+ul#users {
+  clear: both;
+  margin-top: 30px;
 }

@@ -8,7 +8,11 @@ html
       var socket = io.connect('http://localhost:3000');
       socket.on('repeat', function (data) {
         console.log(data);
-        $('#lines').append($('<p>').append($('<em>').text(data.youSaid)));
+        var deleteId = '';
+        if (data.messageId) {
+          deleteId = ' <a href="' + data.messageId + '">Delete</a>';
+        }
+        $('#lines').append($('<p>').append($('<em>').text(data.youSaid), deleteId));
       });
       // dom manipulation
       $(function () {

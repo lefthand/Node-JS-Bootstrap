@@ -221,14 +221,27 @@ function loadUser(req, res, next) {
   next();
 }
 
+function loadRecentPosts(req, res, next) {
+  req.globals = {};
+  postProvider.find({}, function(error, posts) { 
+    req.globals.recentPosts = posts;
+    console.log('We got some posts!');
+    next();
+  }, {created_at:-1});
+}
+
+
+// Add any Route Specific Middleware here:
+loadStuff = [loadUser, loadRecentPosts];
+
 // Routes
-app.get('/', loadUser, function(req, res){
+app.get('/', loadStuff, function(req, res){
   res.render('index', {
-    title: 'Fun', loggedInUser:req.user 
+    title: 'Fun', loggedInUser:req.user, globals:req.globals
   });
 });
 
-app.get('/listen', loadUser, function(req, res){
+app.get('/listen', loadStuff, function(req, res){
   console.log('Listen Session: ' + JSON.stringify(req.session));
   res.render('listen', {layout:false});
 });
@@ -243,7 +256,11 @@ io.sockets.on('connection', function (socket) {
   chatProvider.findAll(function(error, lines) {
     for (var i in lines) {
       message = lines[i].line;
-      socket.emit('repeat', { youSaid: message });
+      var messageId = '';
+      if (hs.session.user && hs.session.user.is_admin) {
+        messageId = lines[i]._id;
+      }
+      socket.emit('repeat', { youSaid: message, messageId: messageId });
     }
   
   }); 
@@ -253,18 +270,18 @@ io.sockets.on('connection', function (socket) {
   });
 });
 
-app.get('/about', loadUser, function(req, res){
+app.get('/about', loadStuff, function(req, res){
   res.render('about', {
-    title: 'About', loggedInUser:req.user 
+    title: 'About', loggedInUser:req.user, globals:req.globals
   });
 });
 
-app.get('/admin', loadUser, function(req, res){
+app.get('/admin', loadStuff, function(req, res){
   if (req.is_admin) {
     localScripts = '$(document).ready(function(){$(\'#categoryForm\').validate();})';
     categoryProvider.findAll(function(error, categories) {
       res.render('admin', {
-        title: 'Admin', loggedInUser:req.user, categories:categories
+        title: 'Admin', loggedInUser:req.user, categories:categories, globals:req.globals
       });
     },{name:1});
   }
@@ -273,7 +290,7 @@ app.get('/admin', loadUser, function(req, res){
   }
 });
 
-app.post('/admin/category/submit', loadUser, function(req, res){
+app.post('/admin/category/submit', loadStuff, function(req, res){
   if (req.is_admin) {
     data = {};
     data.name = req.param('name');
@@ -286,7 +303,7 @@ app.post('/admin/category/submit', loadUser, function(req, res){
   }
 });
 
-app.get('/admin/category/:id/remove', loadUser, function(req, res, next){
+app.get('/admin/category/:id/remove', loadStuff, function(req, res, next){
   if (req.params.id === 'null') {
     res.redirect('/admin');
   }
@@ -303,19 +320,19 @@ app.get('/admin/category/:id/remove', loadUser, function(req, res, next){
   }
 });
 
-app.get('/post/create', loadUser, function(req, res){
+app.get('/post/create', loadStuff, function(req, res){
   localScripts = '$(document).ready(function(){$(\'#postForm\').validate({rules:{email_address:{remote: {url:\'/post/validate/email/\',type:\'post\'}}}});})';
   categoryProvider.findAll(function(error, categories) {
-    res.render('posts/create', { title: 'New Post', post: {_id:'',title:'',category:'',content:''}, categories: categories, loggedInUser: req.user });
+    res.render('posts/create', { title: 'New Post', post: {_id:'',title:'',category:'',content:''}, categories: categories, loggedInUser: req.user, globals:req.globals });
   }, {name:1});
 });
 
-app.get('/post/:id/edit', loadUser, function(req, res, next){
+app.get('/post/:id/edit', loadStuff, function(req, res, next){
   localScripts = '$(document).ready(function(){$(\'#postForm\').validate();})';
   postProvider.findBy_Id(req.params.id, function(error, post) {
     if (req.is_admin || req.user._id === post.user_id) {
       categoryProvider.findAll(function(error, categories) {
-        res.render('posts/edit', { title: 'Post ' + post.title, post: post, categories: categories, loggedInUser:req.user });
+        res.render('posts/edit', { title: 'Post ' + post.title, post: post, categories: categories, loggedInUser:req.user, globals:req.globals });
       }, {name:1});
     }
     else {
@@ -325,7 +342,7 @@ app.get('/post/:id/edit', loadUser, function(req, res, next){
 });
 
 
-app.post('/post/submit/0?', loadUser, function(req, res){
+app.post('/post/submit/0?', loadStuff, function(req, res){
   data = {};
   validatePostData(req, function (error, data){
     if (error) {
@@ -344,7 +361,7 @@ app.post('/post/submit/0?', loadUser, function(req, res){
   });
 });
 
-app.post('/post/submit/:id?', loadUser, function(req, res){
+app.post('/post/submit/:id?', loadStuff, function(req, res){
   data = {};
   postProvider.findBy_Id(req.params.id, function(error, post) {
     if (req.is_admin || post.user_id == req.user._id) {
@@ -369,7 +386,7 @@ app.post('/post/submit/:id?', loadUser, function(req, res){
   });
 });
 
-app.get('/post/:id/remove', loadUser, function(req, res, next){
+app.get('/post/:id/remove', loadStuff, function(req, res, next){
   if (req.params.id === 'null') {
     res.redirect('/users');
   }
@@ -386,16 +403,16 @@ app.get('/post/:id/remove', loadUser, function(req, res, next){
   });
 });
 
-app.get('/post/:id', loadUser, function(req, res, next){
+app.get('/post/:id', loadStuff, function(req, res, next){
   postProvider.findBy_Id(req.params.id, function(error, post) {
     userProvider.findById(post.user_id, function(error, user) {
       post.user = user;
-      res.render('posts/post', { post: post, title: 'Post > ' + post.title, loggedInUser:req.user });
+      res.render('posts/post', { post: post, title: 'Post > ' + post.title, loggedInUser:req.user, globals:req.globals });
     });
   });
 });
 
-app.get('/posts', loadUser, function(req, res){
+app.get('/posts', loadStuff, function(req, res){
   find = {};
   if (req.param('category')) {
     find = {category: req.param('category')};
@@ -415,13 +432,13 @@ app.get('/posts', loadUser, function(req, res){
         }
       }
       categoryProvider.findAll(function(error, categories) {
-        res.render('posts', { title: 'Posts', posts: posts, categories: categories, postUsers: postUsers, loggedInUser:req.user  });
+        res.render('posts', { title: 'Posts', posts: posts, categories: categories, postUsers: postUsers, loggedInUser:req.user, globals:req.globals  });
       });
     });
   }, {created_at:-1});
 });
 
-app.post('/post/validate/email/', loadUser, function(req, res){
+app.post('/post/validate/email/', loadStuff, function(req, res){
   result = '';
   email = req.param('email_address');
   if (email) {
@@ -443,17 +460,17 @@ app.post('/post/validate/email/', loadUser, function(req, res){
 });
 
 
-app.get('/users', loadUser, function(req, res){
+app.get('/users', loadStuff, function(req, res){
   userProvider.find({username: {$ne:null}}, function(error, users) { 
-    res.render('users', { users: users, title: 'Users', loggedInUser:req.user });
+    res.render('users', { users: users, title: 'Users', loggedInUser:req.user, globals:req.globals });
   }, {name:1});
 });
 
-app.get('/user/:id/edit', loadUser, function(req, res, next){
+app.get('/user/:id/edit', loadStuff, function(req, res, next){
   if (req.is_admin || req.params.id == req.user._id) {
     localScripts = '$(document).ready(function(){$(\'#userForm\').validate({rules:{username:{remote: {url:\'/users/validate/username/\',type:\'post\',data:{user_id:' + req.params.id + '}}},email:{remote: {url:\'/users/validate/email/\',type:\'post\',data:{user_id:' + req.params.id + '}}}},messages:{username:{remote: jQuery.format(\'{0} is already in use\')},email:{remote: jQuery.format(\'{0} is already in use\')}, password_confirm:\'Passwords must match.\'}});});';
     userProvider.findById(req.params.id, function(error, user) {
-      res.render('users/edit', { user: user, title: 'User ' + req.params.id, loggedInUser:req.user });
+      res.render('users/edit', { user: user, title: 'User ' + req.params.id, loggedInUser:req.user, globals:req.globals });
     });
   }
   else {
@@ -461,7 +478,7 @@ app.get('/user/:id/edit', loadUser, function(req, res, next){
   }
 });
 
-app.get('/user/:id/remove', loadUser, function(req, res, next){
+app.get('/user/:id/remove', loadStuff, function(req, res, next){
   if (req.params.id === 'null') {
     res.redirect('/users');
   }
@@ -482,12 +499,12 @@ app.get('/user/:id/remove', loadUser, function(req, res, next){
   }
 });
 
-app.get('/user/create', loadUser, function(req, res, next){
+app.get('/user/create', loadStuff, function(req, res, next){
   localScripts = '$(document).ready(function(){$(\'#userForm\').validate({rules:{password:{required:true},username:{remote: {url:\'/users/validate/username/\',type:\'post\'}},email:{remote: {url:\'/users/validate/email/\',type:\'post\'}}},messages:{username:{remote: jQuery.format(\'{0} is already in use\')},email:{remote: jQuery.format(\'{0} is already in use\')}, password_confirm:\'Passwords must match.\'}});});';
-  res.render('users/create', { title: 'New User', user: {_id:'',username:'',name:'',email:''}, loggedInUser:req.user });
+  res.render('users/create', { title: 'New User', user: {_id:'',username:'',name:'',email:''}, loggedInUser:req.user, globals:req.globals });
 });
 
-app.post('/users/validate/username/', loadUser, function(req, res){
+app.post('/users/validate/username/', loadStuff, function(req, res){
   result = '';
   username = req.param('username');
   user_id = req.param('user_id');
@@ -513,7 +530,7 @@ app.post('/users/validate/username/', loadUser, function(req, res){
   }
 });
 
-app.post('/users/validate/email/', loadUser, function(req, res){
+app.post('/users/validate/email/', loadStuff, function(req, res){
   result = '';
   email = req.param('email');
   user_id = req.param('user_id');
@@ -536,7 +553,7 @@ app.post('/users/validate/email/', loadUser, function(req, res){
   }
 });
 
-app.post('/user/submit/0?', loadUser, function(req, res, next){
+app.post('/user/submit/0?', loadStuff, function(req, res, next){
   data = {};
   validateUserData(req, function (error, data){
     if (error) {
@@ -561,7 +578,7 @@ app.post('/user/submit/0?', loadUser, function(req, res, next){
   });
 });
 
-app.post('/user/submit/:id', loadUser, function(req, res){
+app.post('/user/submit/:id', loadStuff, function(req, res){
   if (req.is_admin || req.params.id == req.user._id) {
     data = {};
     validateUserData(req, function (error, data){
@@ -584,15 +601,15 @@ app.post('/user/submit/:id', loadUser, function(req, res){
   }
 });
 
-app.get('/user/:id', loadUser, function(req, res, next){
+app.get('/user/:id', loadStuff, function(req, res, next){
   userProvider.findById(req.params.id, function(error, user) {
     postProvider.find({user_id:user._id}, function(error, posts) {
-      res.render('users/user', { user: user, posts:posts, title: 'User ' + req.params.id, loggedInUser:req.user });
+      res.render('users/user', { user: user, posts:posts, title: 'User ' + req.params.id, loggedInUser:req.user, globals:req.globals });
     },{created_at:-1});
   });
 });
 
-app.post('/login', loadUser, function(req, res){
+app.post('/login', loadStuff, function(req, res){
   if (req.param('username') && req.param('passwordLogin')) {
     userProvider.findOne({username: req.param('username')}, function (error, user) {
       if (error || !user) {

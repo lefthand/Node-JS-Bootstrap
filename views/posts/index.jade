@@ -1,16 +1,18 @@
 h1= title
+.actions 
+  ul
+    li
+      a(href='/post/create') Add Post
 h3 Here's the Posts
-p 
-  a(href='/post/create') Add Post
 p
-  h3 Categories
+  h4 Categories
   ul.categories
    - each category in categories
      li 
        a(href='/posts/?category=#{category.name}') #{category.name}
    li
      a(href='/posts/') All Posts
-table.posts
+table.data
   tr
     th Title
     th Category

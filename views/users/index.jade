@@ -1,20 +1,34 @@
 h1= title
-h3 Here's the users
-p There're right around here somewhere 
-p 
-  a(href='/user/create') Add User
-p Oh right, here they are:
-ul.users
-  - each user in users
+.actions 
+  ul
     li
-      a(href='/user/#{user._id}') #{user.name} \n
+      a(href='/user/create') Add User
+ul#userMosaic\n
+  - each user in users
+    li\n
+      a(href='/user/#{user._id}/')
+        img(src='http://static1.robohash.com/#{user.name}.png?set=set1&size=240x240')
+        br
+        h4=user.name
 - if (loggedInUser.is_admin) 
-  ul.users\n
+  table.data
+    tr
+      th Username
+      th Name
+      th Email
+      th Member Since
+      th Delete
     - each user in users
-      li\n
-        a(href='/user/#{user._id}/remove') Remove #{user.name}
-        |  (#{user._id})
-        img(src='http://static1.robohash.com/#{user.name}')
+      - date = new Date(user.created_at)
+      - userDate= date.toDateString()
+      tr
+        td=user.username
+        td=user.name
+        td=user.email
+        td=userDate
+        td 
+          a(href='/user/#{user._id}/remove') Delete\n
+
 //p Or another way
 //ul.users
 //  != partial('user', users);

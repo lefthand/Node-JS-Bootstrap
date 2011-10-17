@@ -27,7 +27,13 @@ html(lang="en")
             li
               a(href="/admin") Admin
       != partial('login');
-    section!= body
+    section#content!= body
+    section#sidebar
+      - if (globals.recentPosts)
+        ul.recentPosts
+          - each post in globals.recentPosts
+            li
+              a(href="/post/#{post._id}") #{post.title}
     footer
-      p The Footer
+      p 2011 Bodeutsch Inc. No rights reserved 
     

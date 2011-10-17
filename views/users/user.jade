@@ -1,4 +1,11 @@
 h1= title
+-if (loggedInUser.is_admin || loggedInUser.is_root || loggedInUser._id === user._id)
+  .actions 
+    ul
+      li
+        a(href='/user/#{user._id}/edit/') Edit User
+      li
+        a(href='/user/#{user._id}/remove/') Remove User
 h3 Here's the user
 p Some info about the user.
 p Name: #{user.name}
@@ -8,13 +15,13 @@ p Email: #{user.email}
   p Is Root: #{user.is_root}
 -if (loggedInUser.is_admin || loggedInUser.is_root)
   p Is Admin: #{user.is_admin}
--if (loggedInUser.is_admin || loggedInUser.is_root || loggedInUser._id === user._id)
-  p 
-    a(href='/user/#{user._id}/edit/') Edit User
 p Image:
   img(src='http://static1.robohash.com/#{user.name}')
 h3 Posts by this user
-ul.posts
-  - each post in posts
-    li
-      a(href='/post/#{post._id}') #{post.title} \n
+- if (posts.length == 0)
+  p This user has no posts... yet.
+- else
+  ul.posts
+    - each post in posts
+      li
+        a(href='/post/#{post._id}') #{post.title} \n

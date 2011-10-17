@@ -125,7 +125,7 @@ DataProvider.prototype.update = function(update, callback) {
         id = user_collection.db.bson_serializer.ObjectID.createFromHexString(update._id);
       }
       else {
-        id = parseInt(user.id);
+        id = parseInt(update.id);
       }
       user_collection.update({_id: id}, {$set: update.data}, {multi:true,safe:true}, function(err) {
           if (err) console.warn(err.message);
