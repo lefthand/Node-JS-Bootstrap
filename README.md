@@ -32,6 +32,7 @@ Goals
 -  Post list and detail page available to all - DONE
 -  Both in line and post submit verification of data - DONE
 -  Passwords are hashed and secure - DONE
+-  Basic styles and two column design - DONE
 -  New posts are automatically pushed to users
 -  Vows need to be used
 

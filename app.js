@@ -225,9 +225,8 @@ function loadRecentPosts(req, res, next) {
   req.globals = {};
   postProvider.find({}, function(error, posts) { 
     req.globals.recentPosts = posts;
-    console.log('We got some posts!');
     next();
-  }, {created_at:-1});
+  }, {created_at:-1}, 5);
 }
 
 
@@ -249,10 +248,13 @@ app.get('/listen', loadStuff, function(req, res){
 io.sockets.on('connection', function (socket) {
   var hs = socket.handshake; 
   hs.session.info = {IConnected:'And all I got was this lousy status message.'}
+  if (hs.session.newPost) {
+    newPost = hs.session.newPost;
+    delete hs.session.newPost;
+    socket.broadcast.emit('newPost', { title: newPost.title, _id: newPost._id });
+  }
   hs.session.touch().save();
-  console.log('A socket with sessionID ' + hs.sessionID
-        + ' connected!');
-  console.log('A socket with session: ' + JSON.stringify(hs.session));
+
   chatProvider.findAll(function(error, lines) {
     for (var i in lines) {
       message = lines[i].line;
@@ -262,11 +264,13 @@ io.sockets.on('connection', function (socket) {
       }
       socket.emit('repeat', { youSaid: message, messageId: messageId });
     }
-  
   }); 
   socket.on('user message', function (data) {
     socket.broadcast.emit('repeat', { youSaid: data });
     chatProvider.save({line: data}); 
+  });
+  socket.on('new post', function (data) {
+    socket.broadcast.emit('newPost', { title: data });
   });
 });
 
@@ -355,6 +359,8 @@ app.post('/post/submit/0?', loadStuff, function(req, res){
       }
       postProvider.save( data, function( error, post) {
         id = post._id;
+        // Set session value so we can push out new post
+        req.session.newPost = {title: post.title, _id: id};
         res.redirect('/post/' + id);
       });
     }

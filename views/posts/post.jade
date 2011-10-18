@@ -1,13 +1,15 @@
 h1= title
+-if (loggedInUser.is_admin || loggedInUser.is_root || loggedInUser._id === post.user_id)
+  .actions 
+    ul
+      li
+        a(href='/post/#{post._id}/edit/') Edit Post
+      li 
+        a(href='/post/#{post._id}/remove/') Delete Post
 h3 Here's the post
-p Title: #{post.title}
 p Content: #{post.content}
-p Category: #{post.category}
+p Category: 
+  a(href='/posts/?category=#{post.category}') #{post.category}
 -if (post.user && post.user.username)
   p By: 
     a(href='/user/#{post.user_id}') #{post.user.username}
--if (loggedInUser.is_admin || loggedInUser.is_root || loggedInUser._id === post.user_id)
-  p 
-    a(href='/post/#{post._id}/edit/') Edit Post
-  p 
-    a(href='/post/#{post._id}/remove/') Delete Post

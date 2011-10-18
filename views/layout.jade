@@ -4,6 +4,7 @@ html(lang="en")
     meta(charset="utf-8")
     title #{title}
     link(rel="stylesheet", href="/stylesheets/style.css")
+    script(src='/socket.io/socket.io.js')
     script(src='/javascripts/jquery-1.6.4.min.js', type='text/javascript') 
     script(src='/javascripts/jquery.validate.min.js', type='text/javascript') 
     - if (typeof localScripts === "string") 
@@ -11,6 +12,12 @@ html(lang="en")
     | <!--[if lt IE 9]
     script(src="http://html5shiv.googlecode.com/svn/trunk/html5.js")
     | <![endif]-->
+    script
+      var socket = io.connect();
+      socket.on('newPost', function (data) {
+        postLink = ' <a href="/post/' + data._id + '">' + data.title + '</a>';
+        $('#recentPosts').prepend($('<p>').append(postLink));
+      });
   body
     header
       nav
@@ -30,9 +37,9 @@ html(lang="en")
     section#content!= body
     section#sidebar
       - if (globals.recentPosts)
-        ul.recentPosts
+        #recentPosts
           - each post in globals.recentPosts
-            li
+            p 
               a(href="/post/#{post._id}") #{post.title}
     footer
       p 2011 Bodeutsch Inc. No rights reserved 
