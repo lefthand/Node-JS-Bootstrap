@@ -17,6 +17,15 @@ client.on("error", function (err) {
 var app = module.exports = express.createServer();
 var io = require('socket.io').listen(app); 
 
+io.configure('development', function(){
+  io.set('log level', 1);
+});
+
+io.configure('production', function(){
+  io.set('log level', 0);
+});
+
+
 // = Configuration
 
 app.configure(function(){
@@ -241,7 +250,6 @@ app.get('/', loadStuff, function(req, res){
 });
 
 app.get('/listen', loadStuff, function(req, res){
-  console.log('Listen Session: ' + JSON.stringify(req.session));
   res.render('listen', {layout:false});
 });
 
@@ -254,24 +262,24 @@ io.sockets.on('connection', function (socket) {
     socket.broadcast.emit('newPost', { title: newPost.title, _id: newPost._id });
   }
   hs.session.touch().save();
-
-  chatProvider.findAll(function(error, lines) {
-    for (var i in lines) {
-      message = lines[i].line;
-      var messageId = '';
-      if (hs.session.user && hs.session.user.is_admin) {
-        messageId = lines[i]._id;
-      }
-      socket.emit('repeat', { youSaid: message, messageId: messageId });
-    }
-  }); 
-  socket.on('user message', function (data) {
-    socket.broadcast.emit('repeat', { youSaid: data });
-    chatProvider.save({line: data}); 
-  });
   socket.on('new post', function (data) {
     socket.broadcast.emit('newPost', { title: data });
   });
+
+//  chatProvider.findAll(function(error, lines) {
+//    for (var i in lines) {
+//      message = lines[i].line;
+//      var messageId = '';
+//      if (hs.session.user && hs.session.user.is_admin) {
+//        messageId = lines[i]._id;
+//      }
+//      socket.emit('repeat', { youSaid: message, messageId: messageId });
+//    }
+//  }); 
+//  socket.on('user message', function (data) {
+//    socket.broadcast.emit('repeat', { youSaid: data });
+//    chatProvider.save({line: data}); 
+//  });
 });
 
 app.get('/about', loadStuff, function(req, res){
@@ -460,7 +468,6 @@ app.post('/post/validate/email/', loadStuff, function(req, res){
   }
   else {
     result = 'false';
-    console.log('Nothing');
     res.render('validate.jade', {layout:false, result: result});
   }
 });
@@ -500,7 +507,6 @@ app.get('/user/:id/remove', loadStuff, function(req, res, next){
     }
   }
   else {
-    console.log(typeof req.user._id + ' can\'t delete this user! ' + typeof req.params.id);
     res.redirect('/users')
   }
 });
@@ -515,7 +521,6 @@ app.post('/users/validate/username/', loadStuff, function(req, res){
   username = req.param('username');
   user_id = req.param('user_id');
   if (username) {
-    console.log('Username! ' + username);
     userProvider.findOne({_id: {$ne: parseInt(user_id)},username: username}, function (error, user) {
       if (error) {
         console.log('Error! ' + error);
@@ -531,7 +536,6 @@ app.post('/users/validate/username/', loadStuff, function(req, res){
   }
   else {
     result = 'false';
-    console.log('Nothing');
     res.render('validate.jade', {layout:false, result: result});
   }
 });
@@ -541,7 +545,6 @@ app.post('/users/validate/email/', loadStuff, function(req, res){
   email = req.param('email');
   user_id = req.param('user_id');
   if (email) {
-    console.log('Email! ' + email);
     userProvider.findOne({_id: {$ne: parseInt(user_id)}, username: {$ne: null},email: email}, function (error, user) {
       if (user) {
         result = 'false';
@@ -554,7 +557,6 @@ app.post('/users/validate/email/', loadStuff, function(req, res){
   }
   else {
     result = 'false';
-    console.log('Nothing');
     res.render('validate.jade', {layout:false, result: result});
   }
 });

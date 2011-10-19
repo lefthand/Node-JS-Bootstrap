@@ -1,13 +1,13 @@
 form(method='POST', action='/user/submit/#{user._id}', id='userForm')
   p  
     label(for="name") Name:
-    input(value='#{user.name}', name='name', class='required')
+    input(value='#{user.name}', name='name', id='name', class='required')
   p 
     label(for="username") Username:
-    input(value='#{user.username}', name='username', class='required')
+    input(value='#{user.username}', name='username', id='username', class='required')
   p
     label(for="email") Email:
-    input(value='#{user.email}', name='email', class='required email')
+    input(value='#{user.email}', name='email', id='email', class='required email')
   p
     label(for="password") Password:
     input(type='password', id='password', name='password', minlength='5')
