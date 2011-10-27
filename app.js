@@ -1,12 +1,13 @@
 var express = require('express');
 
 var DataProvider = require('./dataProvider.js').DataProvider;
+var PostHelper = require('./lib/post.js');
+var UserHelper = require('./lib/user.js');
 var connect = require('express/node_modules/connect');
 var RedisStore = require('connect-redis')(express);
 var sessionStore = new RedisStore();
 var redis = require("redis");
 var client = redis.createClient();
-var bcrypt = require('bcrypt'); 
 
 var Session = connect.middleware.session.Session,
     parseCookie = connect.utils.parseCookie
@@ -18,7 +19,7 @@ var app = module.exports = express.createServer();
 var io = require('socket.io').listen(app); 
 
 io.configure('development', function(){
-  io.set('log level', 1);
+  io.set('log level', 0);
 });
 
 io.configure('production', function(){
@@ -94,128 +95,6 @@ countProvider.getUniqueId('saves', function(error, count) {
   }
   console.log('The count is: ' + count);
 });
-
-client.incr("connections", function (err, reply) {
-  console.log("This has been run " + reply + " times!");
-});
-
-function validatePostData(req, callback) {
-  errors = [];
-  data = {};
-  if (!req.param('title')) {
-    errors.push('Title required.');  
-  }
-  if (!req.param('content')) {
-    errors.push('Content required.');  
-  }
-  if (errors.length > 0) {
-    callback(errors);
-  }
-  else {
-    data.title = req.param('title');
-    data.content = req.param('content');
-    data.category = req.param('category');
-    if (!req.user._id && !req.param('_id')) {
-      if (!req.param('email_address')) {
-        callback('Email address required.');
-      }
-      else {
-        userProvider.findOne({email: req.param('email_address')}, function( error, user) {
-          if (user && user.username) {
-            callback('Please log in to post with this email address.');
-          }
-          else if (user && !user.username) {
-            data.user_id = user._id;
-            callback( null, data);
-          }
-          else {
-            newUserInfo = {email: req.param('email_address')};
-            countProvider.getUniqueId('users', function(error, id) {
-              newUserInfo._id = id;
-              data.user_id = id;
-              userProvider.save( newUserInfo );
-              callback( null, data);
-            });
-          }
-        });
-      }
-    }
-    else {
-      callback( null, data);
-    }
-  }
-}
-
-function validateUserData(req, callback) {
-  errors = [];
-  data = {};
-  if (req.param('password')) {
-    if (req.param('password').length < 5) {
-      errors.push('Password too short.');  
-    }
-    else if (req.param('password') !== req.param('password_confirm')) {
-      errors.push('Passwords did not match.' + req.param('password' + ' ' + req.param('password_confirm')));  
-    }
-    else {
-      var salt = bcrypt.gen_salt_sync(10);  
-      var hash = bcrypt.encrypt_sync(req.param('password'), salt);
-      data.password = hash;
-    }
-  }
-  else if (!req.param('id')) {
-    errors.push('Password required.');  
-  }
-  if (!req.param('username')) {
-    errors.push('Username required.');  
-  }
-  if (!req.param('name')) {
-    errors.push('Name required.');  
-  }
-  if (!/.*@.*\..*/.test(req.param('email'))){
-    errors.push('Valid email required.');  
-  }
-  if (errors.length == 0) {
-    data.name = req.param('name');
-    data.username = req.param('username');
-    data.email = req.param('email');
-    if (req.user.is_root) {
-      data.is_root = req.param('is_root');
-      data.is_admin = req.param('is_admin');
-    }
-    userProvider.find({_id: {$ne: parseInt(req.params.id)},
-                          $or: [{username: req.param('username')},
-                                {email: req.param('email')}]
-                      }, function (error, users) {
-      if (users.length > 0) {
-        for (var i in users) {
-          if (typeof users[i] !== 'function') {
-            if (users[i].username == req.param('username')) {
-              errors.push('Username already taken.');  
-            }
-            if (users[i].email == req.param('email') && users[i].username) {
-              errors.push('Email Address already taken.');  
-            }
-            else if (users[i].email == req.param('email')  && !users[i].username) {
-              data._id = users[i]._id;
-            }
-          }
-        }
-        if (errors.length == 0) {
-          callback( null, data);
-        }
-        else {
-          callback(errors);
-        }
-      }
-      else {
-        callback( null, data);
-      }
-    });
-  }
-  else {
-    callback(errors);
-  }
-}
 
 function loadUser(req, res, next) {
   if (req.session.user && req.cookies.rememberme) {
@@ -316,20 +195,14 @@ app.post('/admin/category/submit', loadStuff, function(req, res){
 });
 
 app.get('/admin/category/:id/remove', loadStuff, function(req, res, next){
-  if (req.params.id === 'null') {
-    res.redirect('/admin');
-  }
-  if (req.is_admin) {
+  if (req.is_admin && req.params.id !== 'null') {
     categoryProvider.removeBy_id(req.params.id, function(error, id){
       if (error) {
         console.log('Could not delete category ' + id);
       }
     });
-    res.redirect('/admin/');
   }
-  else {
-    res.redirect('/post/' + req.params.id);
-  }
+  res.redirect('/admin/');
 });
 
 app.get('/post/create', loadStuff, function(req, res){
@@ -356,7 +229,7 @@ app.get('/post/:id/edit', loadStuff, function(req, res, next){
 
 app.post('/post/submit/0?', loadStuff, function(req, res){
   data = {};
-  validatePostData(req, function (error, data){
+  PostHelper.validatePostData(req, function (error, data){
     if (error) {
       console.log('Errors: ' + error);
       res.redirect('/post/create/?' + error);
@@ -379,7 +252,7 @@ app.post('/post/submit/:id?', loadStuff, function(req, res){
   data = {};
   postProvider.findBy_Id(req.params.id, function(error, post) {
     if (req.is_admin || post.user_id == req.user._id) {
-      validatePostData(req, function (error, data){
+      PostHelper.validatePostData(req, function (error, data){
         if (error) {
           console.log('Errors: ' + error);
           res.redirect('/post/' + req.params.id + '/edit/?' + error);
@@ -563,7 +436,7 @@ app.post('/users/validate/email/', loadStuff, function(req, res){
 
 app.post('/user/submit/0?', loadStuff, function(req, res, next){
   data = {};
-  validateUserData(req, function (error, data){
+  UserHelper.validateUserData(req, function (error, data){
     if (error) {
       console.log('Errors: ' + error);
       res.redirect('/user/create/?' + error);
@@ -589,7 +462,7 @@ app.post('/user/submit/0?', loadStuff, function(req, res, next){
 app.post('/user/submit/:id', loadStuff, function(req, res){
   if (req.is_admin || req.params.id == req.user._id) {
     data = {};
-    validateUserData(req, function (error, data){
+    UserHelper.validateUserData(req, function (error, data){
       if (error) {
         console.log('Errors: ' + error);
         res.redirect('/user/' + req.params.id + '/edit/?' + error);
