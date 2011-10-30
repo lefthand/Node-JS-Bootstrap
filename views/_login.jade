@@ -14,5 +14,7 @@
         input(type='submit', value='Log In', id='submit')
 - else
   #login
-    p Hi #{loggedInUser.name} 
+    p Hi 
+      a(href='/user/#{loggedInUser._id}/edit') #{loggedInUser.name}
+      &nbsp;\- 
       a(href='/logout/') Log Out\n
