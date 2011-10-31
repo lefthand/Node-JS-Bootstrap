@@ -4,13 +4,10 @@ html(lang="en")
     meta(charset="utf-8")
     title #{title}
     link(rel="stylesheet", href="/stylesheets/style.css")
-    script(src='/socket.io/socket.io.js')
     script(src='/javascripts/jquery-1.6.4.min.js', type='text/javascript') 
-    script(src='/javascripts/jquery.validate.min.js', type='text/javascript') 
-    - if (typeof localScript === "string") 
-      script(src='/javascripts/#{localScript}', type='text/javascript') 
-    - if (typeof localScripts === "string") 
-      script #{localScripts}
+    script(src='/socket.io/socket.io.js')
+    - if (typeof headContent === "string") 
+      != partial(headContent);
     | <!--[if lt IE 9]
     script(src="http://html5shiv.googlecode.com/svn/trunk/html5.js")
     | <![endif]-->
@@ -45,4 +42,3 @@ html(lang="en")
               a(href="/post/#{post._id}") #{post.title}
     footer
       p 2011 Bodeutsch Inc. No rights reserved 
-    
