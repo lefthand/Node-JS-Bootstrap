@@ -98,7 +98,7 @@ postProvider.find({}, function(error, posts) {
   });
 }, {created_at:-1}, 5);
 
-function loadUser(req, res, next) {
+loadUser = function (req, res, next) {
   if (req.session.user && req.cookies.rememberme) {
     req.user = req.session.user;
   }
@@ -114,26 +114,35 @@ function loadUser(req, res, next) {
   next();
 }
 
-// I think I'd rather set things in app.helpers if possible.
-function loadGlobals(req, res, next) {
-  req.globals = {};
-  next();
+loadCategories = function (req, res, next) {
+  categoryProvider.findAll(function(error, categories) {
+    app.helpers({
+      categories: categories 
+    });
+    next();
+  },{name:1});
 }
 
-
-// Add any Route Specific Middleware here:
-loadStuff = [loadUser, loadGlobals];
+loadPost = function (req, res, next) {
+  postProvider.findBy_Id(req.params.id, function(error, post) {
+    req.post = post;
+    app.helpers({
+      post: post 
+    });
+    next();
+  });
+}
 
 // Routes
-app.get('/', loadStuff, function(req, res){
+app.get('/', loadUser, function(req, res){
   res.render('index', {
-    title: 'Fun', loggedInUser:req.user, globals:req.globals
+    title: 'Fun', loggedInUser:req.user
   });
 });
 
-app.get('/about', loadStuff, function(req, res){
+app.get('/about', loadUser, function(req, res){
   res.render('about', {
-    title: 'About', loggedInUser:req.user, globals:req.globals
+    title: 'About', loggedInUser:req.user
   });
 });
 
@@ -142,7 +151,7 @@ UserHelper.add_routes(app);
 AdminHelper.add_routes(app, express);
 LoginHelper.add_routes(app);
 
-app.get('/listen', loadStuff, function(req, res){
+app.get('/listen', loadUser, function(req, res){
   res.render('listen', {layout:false});
 });
 

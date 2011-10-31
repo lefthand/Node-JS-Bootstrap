@@ -1,0 +1,32 @@
+script(src='/javascripts/jquery.validate.min.js', type='text/javascript') 
+script
+  $(document).ready(
+    function(){
+      $('#userForm').validate({
+        rules:{
+          password:{required:true},
+          username:{
+            remote: {
+              url:'/users/validate/username/',
+              type:'post'
+            }
+          },
+          email:{
+            remote: {
+              url:'/users/validate/email/',
+              type:'post'}
+            }
+          },
+          messages:{
+            username:{
+              remote: jQuery.format('{0} is already in use')
+            },
+            email:{
+              remote: jQuery.format('{0} is already in use')
+            },
+            password_confirm:'Passwords must match.'
+          }
+        }
+      );
+    }
+  );
