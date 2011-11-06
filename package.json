@@ -7,6 +7,7 @@
     , "stylus": "latest"
     , "jade": "latest"
     , "mongodb": "latest"
+    , "redis": "latest"
     , "bcrypt": "latest"
     , "connect-redis": "latest"
     , "socket.io": "latest"
