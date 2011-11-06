@@ -79,7 +79,7 @@ Array.prototype.unique = function() {
   return r;
 };
 
-var userProvider = new DataProvider('users');
+var userProvider = new DataProvider('user');
 var postProvider = new DataProvider('post');
 var categoryProvider = new DataProvider('category');
 var countProvider = new DataProvider('count');
@@ -92,13 +92,16 @@ countProvider.getUniqueId('saves', function(error, count) {
   console.log('Run ' + count + ' times.');
 });
 
-postProvider.find({}, function(error, posts) { 
-  app.helpers({
-    lastFivePosts: posts
-  });
-}, {created_at:-1}, 5);
+loadLastFivePosts = function (req, res, next) {
+  postProvider.find({}, function(error, posts) { 
+    app.helpers({
+      lastFivePosts: posts
+    });
+    next();
+  }, {created_at:-1}, 5);
+}
 
-loadUser = function (req, res, next) {
+loadSessionUser = function (req, res, next) {
   if (req.session.user && req.cookies.rememberme) {
     req.user = req.session.user;
   }
@@ -113,6 +116,8 @@ loadUser = function (req, res, next) {
   });
   next();
 }
+
+loadGlobals = [loadSessionUser, loadLastFivePosts];
 
 loadCategories = function (req, res, next) {
   categoryProvider.findAll(function(error, categories) {
@@ -134,13 +139,13 @@ loadPost = function (req, res, next) {
 }
 
 // Routes
-app.get('/', loadUser, function(req, res){
+app.get('/', loadGlobals, function(req, res){
   res.render('index', {
     title: 'Fun', loggedInUser:req.user
   });
 });
 
-app.get('/about', loadUser, function(req, res){
+app.get('/about', loadGlobals, function(req, res){
   res.render('about', {
     title: 'About', loggedInUser:req.user
   });
@@ -151,7 +156,7 @@ UserHelper.add_routes(app);
 AdminHelper.add_routes(app, express);
 LoginHelper.add_routes(app);
 
-app.get('/listen', loadUser, function(req, res){
+app.get('/listen', loadGlobals, function(req, res){
   res.render('listen', {layout:false});
 });
 
