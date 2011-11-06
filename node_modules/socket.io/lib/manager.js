@@ -67,7 +67,9 @@ function Manager (server, options) {
     , resource: '/socket.io'
     , transports: defaultTransports
     , authorization: false
+    , blacklist: ['disconnect']
     , 'log level': 3
+    , 'log colors': true
     , 'close timeout': 25
     , 'heartbeat timeout': 15
     , 'heartbeat interval': 20
@@ -79,6 +81,7 @@ function Manager (server, options) {
     , 'browser client cache': true
     , 'browser client minification': false
     , 'browser client etag': false
+    , 'browser client expires': 315360000
     , 'browser client gzip': false
     , 'browser client handler': false
     , 'client store expiration': 15
@@ -89,6 +92,11 @@ function Manager (server, options) {
   }
 
   var self = this;
+
+  // default error handler
+  server.on('error', function(err) {
+    self.log.warn('error raised: ' + err);
+  });
 
   this.initStore();
 
@@ -146,10 +154,11 @@ Manager.prototype.__defineGetter__('store', function () {
  */
 
 Manager.prototype.__defineGetter__('log', function () {
-  if (this.disabled('log')) return;
-
   var logger = this.get('logger');
+
   logger.level = this.get('log level') || -1;
+  logger.colors = this.get('log colors');
+  logger.enabled = this.enabled('log');
 
   return logger;
 });
@@ -258,7 +267,6 @@ Manager.prototype.initStore = function () {
   this.connected = {};
   this.open = {};
   this.closed = {};
-  this.closedA = [];
   this.rooms = {};
   this.roomClients = {};
 
@@ -329,8 +337,6 @@ Manager.prototype.onOpen = function (id) {
   // if we were buffering messages for the client, clear them
   if (this.closed[id]) {
     var self = this;
-
-    this.closedA.splice(this.closedA.indexOf(id), 1);
 
     this.store.unsubscribe('dispatch:' + id, function () {
       delete self.closed[id];
@@ -420,7 +426,6 @@ Manager.prototype.onClose = function (id) {
   }
 
   this.closed[id] = [];
-  this.closedA.push(id);
 
   var self = this;
 
@@ -463,9 +468,7 @@ Manager.prototype.onClientMessage = function (id, packet) {
 
 Manager.prototype.onClientDisconnect = function (id, reason) {
   for (var name in this.namespaces) {
-    if (this.roomClients[id][name]) {
-      this.namespaces[name].handleDisconnect(id, reason);
-    }
+    this.namespaces[name].handleDisconnect(id, reason, typeof this.roomClients[id][name] !== 'undefined');
   }
 
   this.onDisconnect(id);
@@ -495,7 +498,6 @@ Manager.prototype.onDisconnect = function (id, local) {
 
   if (this.closed[id]) {
     delete this.closed[id];
-    this.closedA.splice(this.closedA.indexOf(id), 1);
   }
 
   if (this.roomClients[id]) {

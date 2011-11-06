@@ -1,1 +1,5 @@
 .monitor
+tmp/
+node_modules
+.project
+.settings

@@ -1,6 +1,6 @@
 {
-    "name": "application-name"
-  , "version": "0.0.1"
+    "name": "Bootstrap"
+  , "version": "0.9.1"
   , "private": true
   , "dependencies": {
       "express": "latest"
@@ -10,5 +10,6 @@
     , "bcrypt": "latest"
     , "connect-redis": "latest"
     , "socket.io": "latest"
+    , "vows": "latest"
   }
 }

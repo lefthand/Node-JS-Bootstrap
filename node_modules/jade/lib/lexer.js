@@ -265,16 +265,40 @@ Lexer.prototype = {
   },
 
   /**
+   * Case.
+   */
+  
+  case: function() {
+    return this.scan(/^case +([^\n]+)/, 'case');
+  },
+
+  /**
+   * When.
+   */
+  
+  when: function() {
+    return this.scan(/^when +([^:\n]+)/, 'when');
+  },
+
+  /**
+   * Default.
+   */
+  
+  default: function() {
+    return this.scan(/^default */, 'default');
+  },
+
+  /**
    * Assignment.
    */
   
   assignment: function() {
     var captures;
-    if (captures = /^(\w+) += *([^\n]+)/.exec(this.input)) {
+    if (captures = /^(\w+) += *([^;\n]+)( *;? *)/.exec(this.input)) {
       this.consume(captures[0].length);
       var name = captures[1]
         , val = captures[2];
-      return this.tok('code', 'var ' + name + ' = (' + val + ')');
+      return this.tok('code', 'var ' + name + ' = (' + val + ');');
     }
   },
 
@@ -284,7 +308,7 @@ Lexer.prototype = {
 
   mixin: function(){
     var captures;
-    if (captures = /^mixin +([-\w]+)(?:\(([^\)]+)\))?/.exec(this.input)) {
+    if (captures = /^mixin +([-\w]+)(?:\((.*)\))?/.exec(this.input)) {
       this.consume(captures[0].length);
       var tok = this.tok('mixin', captures[1]);
       tok.args = captures[2];
@@ -607,6 +631,9 @@ Lexer.prototype = {
       || this.eos()
       || this.pipelessText()
       || this.doctype()
+      || this.case()
+      || this.when()
+      || this.default()
       || this.extends()
       || this.block()
       || this.include()

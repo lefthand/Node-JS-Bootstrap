@@ -190,6 +190,12 @@ Parser.prototype = {
         return this.parseMixin();
       case 'block':
         return this.parseBlock();
+      case 'case':
+        return this.parseCase();
+      case 'when':
+        return this.parseWhen();
+      case 'default':
+        return this.parseDefault();
       case 'extends':
         return this.parseExtends();
       case 'include':
@@ -227,7 +233,51 @@ Parser.prototype = {
     node.line = this.line();
     return node;
   },
+
+  /**
+   *   ':' expr
+   * | block
+   */
+
+  parseBlockExpansion: function(){
+    if (':' == this.peek().type) {
+      this.advance();
+      return new nodes.Block(this.parseExpr());
+    } else {
+      return this.block();
+    }
+  },
+
+  /**
+   * case
+   */
+
+  parseCase: function(){
+    var val = this.expect('case').val
+      , node = new nodes.Case(val);
+    node.line = this.line();
+    node.block = this.block();
+    return node;
+  },
+
+  /**
+   * when
+   */
+
+  parseWhen: function(){
+    var val = this.expect('when').val
+    return new nodes.Case.When(val, this.parseBlockExpansion());
+  },
   
+  /**
+   * default
+   */
+
+  parseDefault: function(){
+    this.expect('default');
+    return new nodes.Case.When('default', this.parseBlockExpansion());
+  },
+
   /**
    * code
    */
@@ -317,8 +367,9 @@ Parser.prototype = {
   
   parseEach: function(){
     var tok = this.expect('each')
-      , node = new nodes.Each(tok.code, tok.val, tok.key, this.block());
+      , node = new nodes.Each(tok.code, tok.val, tok.key);
     node.line = this.line();
+    node.block = this.block();
     return node;
   },
 
@@ -380,14 +431,19 @@ Parser.prototype = {
     if (!this.filename)
       throw new Error('the "filename" option is required to use includes');
 
+    // no extension
+    if (!~basename(path).indexOf('.')) {
+      path += '.jade';
+    }
+
     // non-jade
-    if (~basename(path).indexOf('.')) {
+    if ('.jade' != path.substr(-5)) {
       var path = join(dir, path)
         , str = fs.readFileSync(path, 'utf8');
       return new nodes.Literal(str);
     }
 
-    var path = join(dir, path + '.jade')
+    var path = join(dir, path)
       , str = fs.readFileSync(path, 'utf8')
      , parser = new Parser(str, path, this.options);
 
