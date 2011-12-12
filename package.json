@@ -5,12 +5,16 @@
   , "dependencies": {
       "express": "latest"
     , "stylus": "latest"
+    , "mkdirp": "latest"
     , "jade": "latest"
     , "mongodb": "latest"
+    , "mongoskin": "latest"
     , "redis": "latest"
     , "bcrypt": "latest"
     , "connect-redis": "latest"
     , "socket.io": "latest"
     , "vows": "latest"
+    , "eyes": "latest"
+    , "request": "latest"
   }
 }

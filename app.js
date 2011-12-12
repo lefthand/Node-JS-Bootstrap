@@ -1,4 +1,5 @@
 var express = require('express');
+var mongo = require('mongoskin');
 
 var DataProvider = require('./dataProvider.js').DataProvider;
 var PostHelper = require('./lib/post.js');
@@ -10,7 +11,6 @@ var RedisStore = require('connect-redis')(express);
 var sessionStore = new RedisStore();
 var redis = require("redis");
 var client = redis.createClient();
-var bcrypt = require('bcrypt'); 
 
 var Session = connect.middleware.session.Session,
     parseCookie = connect.utils.parseCookie
@@ -21,7 +21,6 @@ client.on("error", function (err) {
 var app = module.exports = express.createServer();
 var io = require('socket.io').listen(app); 
 io.set('log level', 0);
-
 
 // = Configuration
 
@@ -49,6 +48,18 @@ app.configure('development', function(){
 app.configure('production', function(){
   app.use(express.errorHandler()); 
 });
+
+handleError = function(error) {
+  var currentTime = new Date();
+  var month = currentTime.getMonth() + 1;
+  var day = currentTime.getDate();
+  var year = currentTime.getFullYear();
+  var hours = currentTime.getHours();
+  var minutes = currentTime.getMinutes();
+  var seconds = currentTime.getSeconds();
+  var date = month + "/" + day + "/" + year + ' ' + hours + ":" + minutes + ":" + seconds;
+  console.log(error + ' ' + date);
+}
    
 io.set('authorization', function (data, accept) {
   if (data.headers.cookie) {
@@ -79,11 +90,11 @@ Array.prototype.unique = function() {
   return r;
 };
 
-var userProvider = new DataProvider('user');
-var postProvider = new DataProvider('post');
-var categoryProvider = new DataProvider('category');
+
+var db = mongo.db('localhost:27017/bootstrap')
+var postDb = db.collection('post');
+var categoryDb = db.collection('category');
 var countProvider = new DataProvider('count');
-var chatProvider = new DataProvider('chat');
 
 countProvider.getUniqueId('saves', function(error, count) { 
   if (error) {
@@ -93,12 +104,12 @@ countProvider.getUniqueId('saves', function(error, count) {
 });
 
 loadLastFivePosts = function (req, res, next) {
-  postProvider.find({}, function(error, posts) { 
+  postDb.find({}).sort({created_at:-1}).limit(5).toArray(function(error, posts) { 
     app.helpers({
       lastFivePosts: posts
     });
     next();
-  }, {created_at:-1}, 5);
+  });
 }
 
 loadSessionUser = function (req, res, next) {
@@ -120,16 +131,16 @@ loadSessionUser = function (req, res, next) {
 loadGlobals = [loadSessionUser, loadLastFivePosts];
 
 loadCategories = function (req, res, next) {
-  categoryProvider.findAll(function(error, categories) {
+  categoryDb.find().sort({name:1}).toArray(function(error, categories) {
     app.helpers({
       categories: categories 
     });
     next();
-  },{name:1});
+  });
 }
 
 loadPost = function (req, res, next) {
-  postProvider.findBy_Id(req.params.id, function(error, post) {
+  postDb.findById(req.params.id, function(error, post) {
     req.post = post;
     app.helpers({
       post: post 

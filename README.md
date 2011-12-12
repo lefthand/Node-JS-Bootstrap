@@ -7,6 +7,7 @@ Stack
 -  express
 -  jade
 -  mongodb
+-  mongo-skin
 -  connect-redis
 -  bcrypt
 -  socket.io
@@ -33,8 +34,12 @@ Goals
 -  Both in line and post submit verification of data - DONE
 -  Passwords are hashed and secure - DONE
 -  Basic styles and two column design - DONE
--  New posts are automatically pushed to users
--  Vows need to be used
+-  New posts are automatically pushed to users - DONE
+-  Vows used for unit testing - DONE
+-  Email users at appropriate times
+-  Verify user accounts via email
+-  Forgot password / username links
+-  Log in with either username or email
 
 
  
