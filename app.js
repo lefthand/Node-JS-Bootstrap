@@ -1,7 +1,6 @@
 var express = require('express');
 var mongo = require('mongoskin');
 
-var DataProvider = require('./dataProvider.js').DataProvider;
 var PostHelper = require('./lib/post.js');
 var UserHelper = require('./lib/user.js');
 var AdminHelper = require('./lib/admin.js');
@@ -90,15 +89,23 @@ Array.prototype.unique = function() {
   return r;
 };
 
-
+// connect to the db and make the collections available globally
 var db = mongo.db('localhost:27017/bootstrap')
-var postDb = db.collection('post');
-var categoryDb = db.collection('category');
-var countProvider = new DataProvider('count');
+postDb = db.collection('post');
+userDb = db.collection('user');
+categoryDb = db.collection('category');
+getNextInt = function (type, callback) {
+  db.collection('count').findAndModify({_id: type}, [['_id','asc']], {$inc: {count:1}}, {upsert:true,new:true}, function(error, result) { 
+    if (error) {
+      callback('Could not determine count for ' + type);
+    }
+    callback(null, result.count);
+  });
+};
 
-countProvider.getUniqueId('saves', function(error, count) { 
+getNextInt('saves', function(error, count) {
   if (error) {
-    console.log('Could not determine count');
+    handleError('Could not determine count');
   }
   console.log('Run ' + count + ' times.');
 });
