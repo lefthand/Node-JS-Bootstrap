@@ -1,5 +1,6 @@
 .monitor
 tmp/
 node_modules
+app.log
 .project
 .settings

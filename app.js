@@ -10,6 +10,8 @@ var RedisStore = require('connect-redis')(express);
 var sessionStore = new RedisStore();
 var redis = require("redis");
 var client = redis.createClient();
+var log4js = require('log4js');
+log = log4js.getLogger('app');
 
 var Session = connect.middleware.session.Session,
     parseCookie = connect.utils.parseCookie
@@ -41,25 +43,15 @@ app.configure(function(){
 });
 
 app.configure('development', function(){
-  app.use(express.errorHandler({ dumpExceptions: true, showStack: true })); 
+  app.use(log4js.connectLogger(log, { level: log4js.levels.INFO }));
+  log.setLevel('TRACE');
 });
 
 app.configure('production', function(){
-  app.use(express.errorHandler()); 
+  log4js.addAppender(log4js.fileAppender('app.log'), 'app');
+  log.setLevel('INFO');
 });
 
-handleError = function(error) {
-  var currentTime = new Date();
-  var month = currentTime.getMonth() + 1;
-  var day = currentTime.getDate();
-  var year = currentTime.getFullYear();
-  var hours = currentTime.getHours();
-  var minutes = currentTime.getMinutes();
-  var seconds = currentTime.getSeconds();
-  var date = month + "/" + day + "/" + year + ' ' + hours + ":" + minutes + ":" + seconds;
-  console.log(error + ' ' + date);
-}
-   
 io.set('authorization', function (data, accept) {
   if (data.headers.cookie) {
     data.cookie = parseCookie(data.headers.cookie);
@@ -105,9 +97,9 @@ getNextInt = function (type, callback) {
 
 getNextInt('saves', function(error, count) {
   if (error) {
-    handleError('Could not determine count');
+    log.warn('Could not determine count');
   }
-  console.log('Run ' + count + ' times.');
+  log.info('Run ' + count + ' times.');
 });
 
 loadLastFivePosts = function (req, res, next) {
@@ -208,4 +200,4 @@ io.sockets.on('connection', function (socket) {
 });
 
 app.listen(3000);
-console.log("Express server listening on port %d in %s mode", app.address().port, app.settings.env);
+log.info("Express server listening on port %d in %s mode", app.address().port, app.settings.env);
