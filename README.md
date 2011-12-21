@@ -6,6 +6,7 @@ Stack
 -  node.js
 -  express
 -  jade
+-  mail
 -  mongodb
 -  mongo-skin
 -  connect-redis

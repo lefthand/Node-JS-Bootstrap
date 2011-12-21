@@ -12,7 +12,22 @@ var redis = require("redis");
 var client = redis.createClient();
 var log4js = require('log4js');
 log = log4js.getLogger('app');
+var mail = require('mail').Mail({
+  host: 'smtp.gmail.com',
+  username: 'lefthand@gmail.com',
+  password: 'kiki((((((((((1MAIL'
+});
 
+mail.message({
+  from: 'Justin Bee <lefthand@gmail.com>',
+  to: ['justin@monkdevelopment.com'],
+  subject: 'Hello from Node.JS'
+})
+.body('Node speaks SMTP!')
+.send(function(err) {
+  if (err) throw err;
+  console.log('Sent!');
+});
 var Session = connect.middleware.session.Session,
     parseCookie = connect.utils.parseCookie
 

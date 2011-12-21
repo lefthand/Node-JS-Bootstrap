@@ -6,6 +6,7 @@
       "express": "latest"
     , "stylus": "latest"
     , "mkdirp": "latest"
+    , "mail": "latest"
     , "jade": "latest"
     , "log4js": "latest"
     , "mongodb": "latest"
