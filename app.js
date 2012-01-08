@@ -14,8 +14,8 @@ var log4js = require('log4js');
 log = log4js.getLogger('app');
 var mail = require('mail').Mail({
   host: 'smtp.gmail.com',
-  username: 'lefthand@gmail.com',
-  password: 'kiki((((((((((1MAIL'
+  username: 'YourGmailHere',
+  password: 'YourGmailPasswordHere'
 });
 
 mail.message({
