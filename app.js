@@ -17,17 +17,18 @@ var mail = require('mail').Mail({
   username: 'YourGmailHere',
   password: 'YourGmailPasswordHere'
 });
+//mail.message({
+//  from: 'Justin Bee <lefthand@gmail.com>',
+//  to: ['justin@monkdevelopment.com'],
+//  subject: 'Hello from Node.JS'
+//})
+//.body('Node speaks SMTP!')
+//.send(function(err) {
+//  if (err) throw err;
+//  console.log('Sent!');
+//});
 
-mail.message({
-  from: 'Justin Bee <lefthand@gmail.com>',
-  to: ['justin@monkdevelopment.com'],
-  subject: 'Hello from Node.JS'
-})
-.body('Node speaks SMTP!')
-.send(function(err) {
-  if (err) throw err;
-  console.log('Sent!');
-});
+
 var Session = connect.middleware.session.Session,
     parseCookie = connect.utils.parseCookie
 

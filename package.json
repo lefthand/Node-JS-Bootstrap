@@ -12,7 +12,7 @@
     , "mongodb": "latest"
     , "mongoskin": "latest"
     , "redis": "latest"
-    , "bcrypt": "latest"
+    , "bcrypt": "0.4.1"
     , "connect-redis": "latest"
     , "socket.io": "latest"
     , "vows": "latest"
