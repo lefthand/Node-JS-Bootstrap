@@ -4,3 +4,4 @@ node_modules
 app.log
 .project
 .settings
+mailConfigLocal.js
