@@ -1,4 +1,22 @@
-This project serves to give a basic node.js setup using mongodb. This aims to be a bootstrap for other projects to be built upon providing a robust yet basic framework to build on.
+This project serves to give a basic node.js setup using mongodb. This aims to be a bootstrap for other projects to be built upon providing a robust yet basic framework to build on. This is far from a 'feature complete' web site, but everything included should be a solid as possible. If you start a project based on this please let me know!
+
+Setup
+=====
+Run 'npm install express -g' if you have done so then 'npm install -d' to bring in all requires. I think there's some other step in here but I can't remember now! Make sure that mongodb is running locally. Copy mailConfigDefault.js to mailConfigLocal.js and edit values to get email functionality. Insert into the mongodb collection 'bootstrap' a record like:
+
+{
+  "_id" : 1,
+  "created_at" : ISODate("2011-10-08T21:43:43.934Z"),
+  "email" : "YOUR EMAIL ADDRESS",
+  "is_admin" : on,
+  "is_root" : on,
+  "modified_at" : ISODate("2012-01-15T18:26:40.183Z"),
+  "name" : "YOUR NAME",
+  "password" : "",
+  "username" : "YOUR ARBITRARY USER NAME"
+}
+
+Then use the password reset link to get your password.
 
 Stack
 =====
@@ -39,11 +57,13 @@ Goals
 -  Vows used for unit testing - DONE
 -  Email users at appropriate times
 -  Verify user accounts via email
--  Forgot password / username links
+-  Forgot password / username links - DONE
 -  Log in with either username or email
 
 
- 
+Contribute! 
+=====
+Any feedback is most welcome. If you want to contribute some code, all the better.
  
 
 
