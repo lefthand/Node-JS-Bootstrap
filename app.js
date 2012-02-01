@@ -13,15 +13,18 @@ var client = redis.createClient();
 var log4js = require('log4js');
 log = log4js.getLogger('app');
 var path = require('path');
-if (path.existsSync('./mailConfigLocal.js')) {
-  var mailConfig = require('./mailConfigLocal.js');
+if (path.existsSync('./configLocal.js')) {
+  var config = require('./configLocal.js');
   mail = require('mail').Mail(
-    mailConfig.getConfig()
+    config.getMailConfig()
   );
+  siteInfo = config.getSiteConfig();
 }
 else {
-  log.error('Please copy mailConfigDefault.js to mailConfigLocal.js and replace applicable values.');
+  log.error('Please copy configDefault.js to configLocal.js and replace applicable values.');
 }
+
+console.log(siteInfo);
 
 var Session = connect.middleware.session.Session,
     parseCookie = connect.utils.parseCookie
@@ -105,7 +108,7 @@ String.prototype.randomString = function(stringLength) {
 }
 
 // connect to the db and make the collections available globally
-var db = mongo.db('localhost:27017/bootstrap')
+var db = mongo.db('localhost:27017/' + siteInfo.database_collection)
 postDb = db.collection('post');
 userDb = db.collection('user');
 categoryDb = db.collection('category');
@@ -126,7 +129,7 @@ getNextInt('saves', function(error, count) {
 });
 
 loadLastFivePosts = function (req, res, next) {
-  postDb.find({}).sort({created_at:-1}).limit(5).toArray(function(error, posts) { 
+  postDb.find({requires_verification: { $ne: true }}).sort({created_at:-1}).limit(5).toArray(function(error, posts) { 
     app.helpers({
       lastFivePosts: posts
     });
@@ -163,6 +166,9 @@ loadCategories = function (req, res, next) {
 
 loadPost = function (req, res, next) {
   postDb.findById(req.params.id, function(error, post) {
+    if (error || !post) {
+      log.trace('Could not find post!');
+    }
     req.post = post;
     app.helpers({
       post: post 

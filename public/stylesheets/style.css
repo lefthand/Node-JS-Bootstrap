@@ -6,16 +6,17 @@ body {
   font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
   width: 1024px;
   margin: 10px 0 10px 30px;
+  background: #000;
 }
 a {
-  color: #00b7ff;
+  color: #000;
 }
 header {
   float: left;
   width: 1004px;
   padding: 10px;
   margin-bottom: 20px;
-  background: #fdf;
+  background: #ccc;
   clear: both;
 }
 nav {
@@ -51,12 +52,12 @@ section {
 }
 section#content {
   width: 740px;
-  background: #dfd;
+  background: #ccc;
   padding: 15px 20px 5px;
 }
 section#sidebar {
   width: 214px;
-  background: #dfd;
+  background: #ccc;
   margin-left: 20px;
   padding: 20px 5px;
 }
@@ -85,7 +86,7 @@ footer {
   width: 1024px;
   padding: 10px;
   margin-top: 20px;
-  background: #fdf;
+  background: #ccc;
   clear: both;
 }
 /*******************/

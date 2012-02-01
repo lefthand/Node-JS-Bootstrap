@@ -1,7 +1,6 @@
 var vows = require('vows');
 var assert = require('assert');
 var request = require('request');
-var DataProvider = require('../dataProvider.js').DataProvider;
 var PostHelper = require('../lib/post.js');
 
 vows.describe('Creating a Post').addBatch({
