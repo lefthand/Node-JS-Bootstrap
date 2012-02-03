@@ -4,7 +4,6 @@ var mongo = require('mongoskin');
 var PostHelper = require('./lib/post.js');
 var UserHelper = require('./lib/user.js');
 var AdminHelper = require('./lib/admin.js');
-var LoginHelper = require('./lib/login.js');
 var connect = require('express/node_modules/connect');
 var RedisStore = require('connect-redis')(express);
 var sessionStore = new RedisStore();
@@ -185,15 +184,16 @@ app.get('/', loadGlobals, function(req, res){
 });
 
 app.get('/about', loadGlobals, function(req, res){
-  res.render('about', {
-    title: 'About', loggedInUser:req.user
+  res.render('default', {
+    title: 'About',
+    loggedInUser:req.user,
+    text: 'We\'re really a fun bunch of people!'
   });
 });
 
 PostHelper.add_routes(app);
 UserHelper.add_routes(app);
 AdminHelper.add_routes(app, express);
-LoginHelper.add_routes(app);
 
 app.get('/listen', loadGlobals, function(req, res){
   res.render('listen', {layout:false});
