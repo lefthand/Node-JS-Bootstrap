@@ -19,8 +19,7 @@ table.data
     th User
     th Created
   - each post in posts
-    - date = new Date(post.created_at)
-    - postDate= date.toDateString()
+    - postDate = post._id.getTimestamp().toDateString()
     tr
       td
         a(href='/post/#{post._id}') #{post.title} \n
