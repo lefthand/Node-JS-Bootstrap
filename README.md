@@ -1,6 +1,6 @@
 This project serves to give a basic node.js setup using mongodb. This aims to be a bootstrap for other projects providing a robust yet basic framework on which to build. This is far from a 'feature complete' web site, but everything included should be a solid as possible. If you start a project based on this please let me know!
 
-[![Build Status](https://secure.travis-ci.org/[lefthand]/[Node-JS-Bootstrap].png)](http://travis-ci.org/[lefthand]/[Node-JS-Bootstrap])
+[![Build Status](https://secure.travis-ci.org/lefthand/Node-JS-Bootstrap.png)](http://travis-ci.org/lefthand/Node-JS-Bootstrap)
 
 Setup
 =====
