@@ -18,5 +18,8 @@
     , "vows": "latest"
     , "eyes": "latest"
     , "request": "latest"
+  },
+  "scripts": {
+    "test": "vows --spec"
   }
 }
