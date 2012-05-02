@@ -3,21 +3,21 @@ var assert = require('assert');
 var request = require('request');
 
 vows.describe('General Pages').addBatch({
-  'Loading page': {
-    'About': {
+  'Looking at some': {
+    'Numbers': {
       topic: function() {
-        request('http://localhost:3000/about', this.callback);
+        return {aNumber:2}  
       },
-      'will come up just fine': function (error, res) {
-        assert.equal(res.statusCode, 200);
+      'will be fun': function (error, res) {
+        assert.equal(res.aNumber, 2);
       }
     },
-    'Admin': {
+    'Text': {
       topic: function() {
-        request('http://localhost:3000/admin', this.callback);
+        return {someText:"fun"}  
       },
-      'will redirect to the index page': function (error, res, body) {
-        assert.match(body, /Welcome/);
+      'will also be fun': function (error, res) {
+        assert.match(res.someText, /fun/);
       }
     }
   }
