@@ -21,6 +21,11 @@ if (path.existsSync('./configLocal.js')) {
 }
 else {
   log.error('Please copy configDefault.js to configLocal.js and replace applicable values.');
+  var config = require('./configDefault.js');
+  mail = require('mail').Mail(
+    config.getMailConfig()
+  );
+  siteInfo = config.getSiteConfig();
 }
 
 console.log(siteInfo);
