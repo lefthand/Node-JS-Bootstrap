@@ -1,6 +1,7 @@
 var vows = require('vows');
 var assert = require('assert');
 var request = require('request');
+var request = require('../app.js');
 
 vows.describe('General Pages').addBatch({
   'Looking at some': {
@@ -12,12 +13,14 @@ vows.describe('General Pages').addBatch({
         assert.equal(res.aNumber, 2);
       }
     },
-    'Text': {
+    'Random Text': {
       topic: function() {
-        return {someText:"fun"}  
+        var randomText = '';
+        randomText = randomText.randomString(10);
+        return {someText:randomText}  
       },
-      'will also be fun': function (error, res) {
-        assert.match(res.someText, /fun/);
+      'will be random': function (error, res) {
+        assert.match(res.someText, /[a-zA-Z0-9]{10}/);
       }
     }
   }
