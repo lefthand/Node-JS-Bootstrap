@@ -112,7 +112,7 @@ String.prototype.randomString = function(stringLength) {
 }
 
 // connect to the db and make the collections available globally
-var db = mongo.db('localhost:27017/' + siteInfo.database_collection)
+var db = mongo.db('localhost:27017/' + siteInfo.database_collection);
 postDb = db.collection('post');
 userDb = db.collection('user');
 categoryDb = db.collection('category');

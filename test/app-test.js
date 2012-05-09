@@ -2,15 +2,16 @@ var vows = require('vows');
 var assert = require('assert');
 var request = require('request');
 var request = require('../app.js');
+var mongo = require('mongoskin');
 
 vows.describe('General Pages').addBatch({
-  'Looking at some': {
-    'Numbers': {
+  'From site config settings': {
+    'the site url': {
       topic: function() {
-        return {aNumber:2}  
+        return siteInfo
       },
-      'will be fun': function (error, res) {
-        assert.equal(res.aNumber, 2);
+      'will be a string': function (error, res) {
+        assert.isString(res.site_url);
       }
     },
     'Random Text': {
