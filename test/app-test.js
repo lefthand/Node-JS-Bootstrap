@@ -43,7 +43,7 @@ vows.describe('General Pages').addBatch({
     'ajax validate existing email address': {
       topic: function() {
          request({ method: 'POST',
-             url: 'http://localhost:3000/post/validate/email/?email=justin@example.com'
+             url: 'http://localhost:3000/post/validate/email/?email=admin@example.com'
              }, this.callback);
        },
        'will be rejected': function (error, res, body) {
