@@ -12,7 +12,9 @@ var client = redis.createClient();
 var log4js = require('log4js');
 log = log4js.getLogger('app');
 var path = require('path');
-if (path.existsSync('./configLocal.js')) {
+var fs = require('fs');
+exists = fs.existsSync || path.existsSync
+if (exists('./configLocal.js')) {
   var config = require('./configLocal.js');
   mail = require('mail').Mail(
     config.getMailConfig()
