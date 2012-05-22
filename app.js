@@ -9,6 +9,7 @@ var RedisStore = require('connect-redis')(express);
 var sessionStore = new RedisStore();
 var redis = require("redis");
 var client = redis.createClient();
+var bcrypt = require('bcrypt'); 
 var log4js = require('log4js');
 log = log4js.getLogger('app');
 var path = require('path');
@@ -132,6 +133,35 @@ getNextInt('saves', function(error, count) {
     log.warn('Could not determine count');
   }
   log.info('Run ' + count + ' times.');
+});
+
+// If this is the first time this app has been run insert a new admin user
+userDb.findOne({is_root:'on'}, function(error, result) { 
+  if (error) {
+    log.warn('Could not determine if this is the first run.');
+  }
+  else if(!result) {
+    log.info('Looks like this is your first run! Hello and Welcome.');
+    var newPassword = '';
+    var newUserData = {};
+    newPassword = newPassword.randomString(10);
+    var salt = bcrypt.gen_salt_sync(10);  
+    var newPasswordHash = bcrypt.encrypt_sync(newPassword, salt);
+    newUserData = { "_id" : 1, "email" : "admin@example.com", "is_admin" : 'on', "is_root" : 'on', "name" : "Mister Admin", "password" : newPasswordHash, "username" : "admin" }
+    newUserData.created_at = new Date();
+    newUserData.modified_at = new Date();
+    userDb.insert( newUserData, function( error, userData) {
+      if (error) {
+        log.error('Couldn\'t insert admin user. Is mongo running? Error: ' + error); 
+      }
+      else {
+        log.info('You can now login with username "admin" and password "' + newPassword + '"'); 
+      }
+    });
+  }
+  else {
+    // There is a user, this isn't the first run so there's nothing to do. 
+  }
 });
 
 loadLastFivePosts = function (req, res, next) {

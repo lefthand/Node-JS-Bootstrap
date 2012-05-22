@@ -4,21 +4,10 @@ This project serves to give a basic node.js setup using mongodb. This aims to be
 
 Setup
 =====
-Run 'npm install express -g' if you haven't done so, then 'npm install -d' to bring in all requires. Make sure that mongodb is running locally. Copy mailConfigDefault.js to mailConfigLocal.js and edit values to get email functionality. Insert into the mongodb collection 'bootstrap.user' a record like:
+Run 'npm install express -g' if you haven't done so, then 'npm install -d' to bring in all requires. Make sure that mongodb is running locally. Copy configDefault.js to configLocal.js and edit values to set the mongo database name, site settings, and get email functionality. 
 
-{
-  "_id" : 1,
-  "created_at" : ISODate("2011-10-08T21:43:43.934Z"),
-  "email" : "YOUR EMAIL ADDRESS",
-  "is_admin" : on,
-  "is_root" : on,
-  "modified_at" : ISODate("2012-01-15T18:26:40.183Z"),
-  "name" : "YOUR NAME",
-  "password" : "",
-  "username" : "YOUR ARBITRARY USER NAME"
-}
+The first time you run app.js a root user will be created for you. The login credentials will be output to the the console. 
 
-Then use the password reset link to get your password.
 
 Stack
 =====
@@ -70,7 +59,3 @@ Goals
 Contribute! 
 =====
 Any feedback is most welcome. If you want to contribute some code, all the better.
- 
-
-
-  
