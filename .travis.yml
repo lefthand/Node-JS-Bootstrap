@@ -2,8 +2,6 @@ language: node_js
 node_js:
   - 0.6
   - 0.7
-before_script:
-  mongo bootstrap --eval 'db.user.insert({_id:1,"created_at":ISODate("2011-10-08T21:43:43.934Z"),"email":"admin@example.com", "is_admin":"on", "is_root":"on", "modified_at":ISODate("2012-01-15T18:26:40.183Z"), "name":"Mister Admin", "password":"", "username":"admin"});'
 notifications:
   irc: "irc.freenode.org#zeroviz"
   skip_join: true
