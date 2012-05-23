@@ -147,15 +147,21 @@ userDb.findOne({is_root:'on'}, function(error, result) {
     newPassword = newPassword.randomString(10);
     var salt = bcrypt.gen_salt_sync(10);  
     var newPasswordHash = bcrypt.encrypt_sync(newPassword, salt);
-    newUserData = { "_id" : 1, "email" : "admin@example.com", "is_admin" : 'on', "is_root" : 'on', "name" : "Mister Admin", "password" : newPasswordHash, "username" : "admin" }
-    newUserData.created_at = new Date();
-    newUserData.modified_at = new Date();
-    userDb.insert( newUserData, function( error, userData) {
+    getNextInt('users', function(error, count) {
       if (error) {
-        log.error('Couldn\'t insert admin user. Is mongo running? Error: ' + error); 
-      }
-      else {
-        log.info('You can now login with username "admin" and password "' + newPassword + '"'); 
+        log.error('Couldn\'t create admin user id.  Is mongo running? Error: ' + error);
+      } else {
+        newUserData = { "_id" : count, "email" : "admin@example.com", "is_admin" : 'on', "is_root" : 'on', "name" : "Mister Admin", "password" : newPasswordHash, "username" : "admin" }
+        newUserData.created_at = new Date();
+        newUserData.modified_at = new Date();
+        userDb.insert( newUserData, function( error, userData) {
+          if (error) {
+            log.error('Couldn\'t insert admin user. Is mongo running? Error: ' + error); 
+          }
+          else {
+            log.info('You can now login with username "admin" and password "' + newPassword + '"'); 
+          }
+        });
       }
     });
   }
