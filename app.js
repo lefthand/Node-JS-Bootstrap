@@ -120,41 +120,6 @@ postDb = db.collection('post');
 userDb = db.collection('user');
 categoryDb = db.collection('category');
 
-// If this is the first time this app has been run insert a new admin user
-userDb.findOne({is_root:'on'}, function(error, result) { 
-  if (error) {
-    log.warn('Could not determine if this is the first run. Is mongodb running?');
-  }
-  else if(!result) {
-    log.info('Looks like this is your first run! Hello and Welcome.');
-    var newPassword = '';
-    var newUserData = {};
-    newPassword = newPassword.randomString(10);
-    var salt = bcrypt.gen_salt_sync(10);  
-    var newPasswordHash = bcrypt.encrypt_sync(newPassword, salt);
-    getNextInt('users', function(error, count) {
-      if (error) {
-        log.error('Couldn\'t create admin user id.  Is mongo running? Error: ' + error);
-      } else {
-        newUserData = { "_id" : count, "email" : "admin@example.com", "is_admin" : 'on', "is_root" : 'on', "name" : "Mister Admin", "password" : newPasswordHash, "username" : "admin" }
-        newUserData.created_at = new Date();
-        newUserData.modified_at = new Date();
-        userDb.insert( newUserData, function( error, userData) {
-          if (error) {
-            log.error('Couldn\'t insert admin user. Is mongo running? Error: ' + error); 
-          }
-          else {
-            log.info('You can now login with username "admin" and password "' + newPassword + '"'); 
-          }
-        });
-      }
-    });
-  }
-  else {
-    // There is a user, this isn't the first run so there's nothing to do. 
-  }
-});
-
 getNextInt = function (type, callback) {
   db.collection('count').findAndModify({_id: type}, [['_id','asc']], {$inc: {count:1}}, {upsert:true,new:true}, function(error, result) { 
     if (error) {
@@ -276,5 +241,42 @@ io.sockets.on('connection', function (socket) {
 //  });
 });
 
-app.listen(3000);
-log.info("Express server listening on port %d in %s mode", app.address().port, app.settings.env);
+
+// If this is the first time this app has been run insert a new admin user
+userDb.findOne({is_root:'on'}, function(error, result) { 
+  if (error) {
+    log.warn('Could not determine if this is the first run. Is mongodb running?');
+  }
+  else if(!result) {
+    log.info('Looks like this is your first run! Hello and Welcome.');
+    var newPassword = '';
+    var newUserData = {};
+    newPassword = newPassword.randomString(10);
+    var salt = bcrypt.gen_salt_sync(10);  
+    var newPasswordHash = bcrypt.encrypt_sync(newPassword, salt);
+    getNextInt('users', function(error, count) {
+      if (error) {
+        log.error('Couldn\'t create admin user id.  Is mongo running? Error: ' + error);
+      } else {
+        newUserData = { "_id" : count, "email" : "admin@example.com", "is_admin" : 'on', "is_root" : 'on', "name" : "Mister Admin", "password" : newPasswordHash, "username" : "admin" }
+        newUserData.created_at = new Date();
+        newUserData.modified_at = new Date();
+        userDb.insert( newUserData, function( error, userData) {
+          if (error) {
+            log.error('Couldn\'t insert admin user. Is mongo running? Error: ' + error); 
+          }
+          else {
+            log.info('You can now login with username "admin" and password "' + newPassword + '"'); 
+            app.listen(3000);
+            log.info("Express server listening on port %d in %s mode", app.address().port, app.settings.env);
+          }
+        });
+      }
+    });
+  }
+  else {
+    // There is a user, this isn't the first run so let's get it started
+    app.listen(3000);
+    log.info("Express server listening on port %d in %s mode", app.address().port, app.settings.env);
+  }
+});
