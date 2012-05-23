@@ -4,9 +4,14 @@ This project serves to give a basic node.js setup using mongodb. This aims to be
 
 Setup
 =====
-Run 'npm install express -g' if you haven't done so, then 'npm install -d' to bring in all requires. Make sure that mongodb is running locally. Copy configDefault.js to configLocal.js and edit values to set the mongo database name, site settings, and get email functionality. 
 
-The first time you run app.js a root user will be created for you. The login credentials will be output to the the console. 
+- Run 'npm install express -g' if you haven't done so.
+- Run 'npm install' to bring in all dependencies.
+- Make sure that mongodb is running locally.
+- Make sure that redis is running locally.
+- Copy configDefault.js to configLocal.js and edit values to set the mongo database name, site settings, and get email functionality. 
+
+The first time you run app.js a root user will be created for you. The login credentials will be *output to the the console*. 
 
 
 Stack
