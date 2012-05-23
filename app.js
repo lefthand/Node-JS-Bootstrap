@@ -119,26 +119,11 @@ var db = mongo.db('localhost:27017/' + siteInfo.database_collection);
 postDb = db.collection('post');
 userDb = db.collection('user');
 categoryDb = db.collection('category');
-getNextInt = function (type, callback) {
-  db.collection('count').findAndModify({_id: type}, [['_id','asc']], {$inc: {count:1}}, {upsert:true,new:true}, function(error, result) { 
-    if (error) {
-      callback('Could not determine count for ' + type);
-    }
-    callback(null, result.count);
-  });
-};
-
-getNextInt('saves', function(error, count) {
-  if (error) {
-    log.warn('Could not determine count');
-  }
-  log.info('Run ' + count + ' times.');
-});
 
 // If this is the first time this app has been run insert a new admin user
 userDb.findOne({is_root:'on'}, function(error, result) { 
   if (error) {
-    log.warn('Could not determine if this is the first run.');
+    log.warn('Could not determine if this is the first run. Is mongodb running?');
   }
   else if(!result) {
     log.info('Looks like this is your first run! Hello and Welcome.');
@@ -167,6 +152,26 @@ userDb.findOne({is_root:'on'}, function(error, result) {
   }
   else {
     // There is a user, this isn't the first run so there's nothing to do. 
+  }
+});
+
+getNextInt = function (type, callback) {
+  db.collection('count').findAndModify({_id: type}, [['_id','asc']], {$inc: {count:1}}, {upsert:true,new:true}, function(error, result) { 
+    if (error) {
+      callback('Could not determine count for ' + type + '. Is mongodb running?');
+    }
+    else {
+      callback(null, result.count);
+    }
+  });
+};
+
+getNextInt('saves', function(error, count) {
+  if (error) {
+    log.warn(error);
+  }
+  else {
+    log.info('Run ' + count + ' times.');
   }
 });
 
