@@ -18,6 +18,7 @@
     , "vows": "*"
     , "eyes": "*"
     , "request": "*"
+    , "tooljs": "*"
   },
   "scripts": {
     "test": "vows --spec"
