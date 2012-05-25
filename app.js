@@ -293,7 +293,13 @@ function start_app(callback) {
   });
 }
 
-module.exports = function (callback) {
-  start_app(callback);
-  return app;
-};
+if (require.main === module) {
+  start_app();
+  module.exports = app;
+} else {  
+  module.exports = function (callback) {
+    start_app(callback);
+    return app;
+  };
+}
+
