@@ -22,7 +22,7 @@ table.data
     - postDate = post._id.getTimestamp().toDateString()
     tr
       td
-        a(href='/post/#{post._id}') #{post.title} \n
+        a(href='/post/#{post._id}') #{post.title}
       td= post.category
       td= postUsers[post.user_id]
       td= postDate

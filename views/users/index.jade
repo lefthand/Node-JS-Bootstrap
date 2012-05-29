@@ -3,9 +3,9 @@ h1= title
   ul
     li
       a(href='/user/create') Add User
-ul#userMosaic\n
+ul#userMosaic
   - each user in users
-    li\n
+    li
       a(href='/user/#{user._id}/')
         img(src='http://static1.robohash.com/#{user.name}.png?set=set1&size=240x240')
         br
@@ -27,7 +27,7 @@ ul#userMosaic\n
         td=user.email
         td=userDate
         td 
-          a(href='/user/#{user._id}/remove') Delete\n
+          a(href='/user/#{user._id}/remove') Delete
 
 //p Or another way
 //ul.users
