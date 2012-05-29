@@ -6,3 +6,5 @@ app.log
 .settings
 configLocal.js
 deploy
+Capfile
+config/

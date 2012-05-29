@@ -14,7 +14,7 @@ var log4js = require('log4js');
 log = log4js.getLogger('app');
 var path = require('path');
 var fs = require('fs');
-exists = fs.existsSync || path.existsSync
+exists = fs.existsSync || path.existsSync;
 if (exists('./configLocal.js')) {
   var config = require('./configLocal.js');
   mail = require('mail').Mail(
@@ -69,7 +69,7 @@ app.configure('development', function(){
 });
 
 app.configure('production', function(){
-  log4js.addAppender(log4js.fileAppender('app.log'), 'app');
+  app.use(log4js.connectLogger(log, { level: log4js.levels.WARN }));
   log.setLevel('INFO');
 });
 
@@ -193,7 +193,7 @@ loadPost = function (req, res, next) {
 // Routes
 app.get('/', loadGlobals, function(req, res){
   res.render('index', {
-    title: 'Fun', loggedInUser:req.user
+    title: 'Fun!!', loggedInUser:req.user
   });
 });
 
