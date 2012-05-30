@@ -8,7 +8,7 @@ p Go ahead, administrate something
 div 
   h3 Categories
   - each category in categories
-    li\n
+    li
        #{category.name}
        a(href='/admin/category/#{category._id}/remove') (Remove)
   form(method='POST', action='/admin/category/submit/', id='categoryForm')

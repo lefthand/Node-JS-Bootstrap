@@ -14,7 +14,7 @@ vows.describe('General Pages').addBatch({
     'Loading page': {
       'About': {
         topic: function() {
-           request('http://localhost:3000/about', this.callback);
+           request('http://localhost:3002/about', this.callback);
          },
          'will come up just fine': function (error, res) {
            assert.equal(res.statusCode, 200);
@@ -22,7 +22,7 @@ vows.describe('General Pages').addBatch({
       },
       'Admin': {
         topic: function() {
-           request('http://localhost:3000/admin', this.callback);
+           request('http://localhost:3002/admin', this.callback);
          },
          'will redirect to the index page': function (error, res, body) {
            assert.match(body, /Welcome/);
@@ -32,7 +32,7 @@ vows.describe('General Pages').addBatch({
     'ajax validate existing email address': {
       topic: function() {
          request({ method: 'POST',
-             url: 'http://localhost:3000/post/validate/email/?email=admin@example.com'
+             url: 'http://localhost:3002/post/validate/email/?email=admin@example.com'
              }, this.callback);
        },
        'will be rejected': function (error, res, body) {
