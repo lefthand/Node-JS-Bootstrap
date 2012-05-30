@@ -278,7 +278,7 @@ function start_app(callback) {
             }
             else {
               log.info('You can now login with username "admin" and password "' + newPassword + '"'); 
-              app.listen(3000, callback);
+              app.listen(3002, callback);
               log.info("Express server listening on port %d in %s mode", app.address().port, app.settings.env);
             }
           });
@@ -287,7 +287,7 @@ function start_app(callback) {
     }
     else {
       // There is a user, this isn't the first run so let's get it started
-      app.listen(3000, callback);
+      app.listen(3002, callback);
       log.info("Express server listening on port %d in %s mode", app.address().port, app.settings.env);
     }
   });

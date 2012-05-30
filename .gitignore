@@ -5,6 +5,4 @@ app.log
 .project
 .settings
 configLocal.js
-deploy
 Capfile
-config/
