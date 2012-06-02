@@ -1,6 +1,6 @@
 exports.getSiteConfig = function () {
   configValues =  {
-    site_url: 'http://localhost:3000',
+    site_url: 'http://localhost:3002',
     site_name: 'Node.JS Bootstrap',
     site_email: 'your email address',
     database_collection: 'bootstrap'
