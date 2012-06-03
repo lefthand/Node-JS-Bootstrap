@@ -193,15 +193,14 @@ loadPost = function (req, res, next) {
 // Routes
 app.get('/', loadGlobals, function(req, res){
   res.render('index', {
-    title: 'Fun!!', loggedInUser:req.user
+    title: 'Node.JS Bootstrap', loggedInUser:req.user
   });
 });
 
 app.get('/about', loadGlobals, function(req, res){
-  res.render('default', {
+  res.render('about', {
     title: 'About',
-    loggedInUser:req.user,
-    text: 'We\'re really a fun bunch of people!'
+    loggedInUser:req.user
   });
 });
 

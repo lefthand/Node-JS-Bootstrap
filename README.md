@@ -2,26 +2,29 @@ This project serves to give a basic node.js setup using mongodb. This aims to be
 
 [![Build Status](https://secure.travis-ci.org/lefthand/Node-JS-Bootstrap.png)](http://travis-ci.org/lefthand/Node-JS-Bootstrap)
 
+Checkout the [demo site](http://bootstrap.bodeutsch.com) to see it in action.
+
 Setup
 =====
-
 - Run 'npm install express -g' if you haven't done so.
 - Run 'npm install' to bring in all dependencies.
 - Make sure that mongodb is running locally.
 - Make sure that redis is running locally.
-- Copy configDefault.js to configLocal.js and edit values to set the mongo database name, site settings, and get email functionality. 
+- *OPTIONAL* Copy configDefault.js to configLocal.js and edit values to set the mongo database name, site settings, and get email functionality. 
 
 The first time you run app.js a root user will be created for you. The login credentials will be *output to the the console*. 
 
-
 Stack
 =====
-
 -  node.js
 -  express
+-  mongodb
+-  redis
+
+Node Module
+===========
 -  jade
 -  mail
--  mongodb
 -  mongo-skin
 -  connect-redis
 -  bcrypt
@@ -30,7 +33,6 @@ Stack
 
 Goals
 =====
-  
 -  Create members
 -  Users can create their own accounts
 -  Users can update or delete their own accouts
@@ -59,7 +61,6 @@ Goals
 -  User and posts lists use pagination - TODO
 -  User and post lists can be filtered with ajax - TODO
 -  RSS feeds are built automatically - TODO
-
 
 Contribute! 
 =====
