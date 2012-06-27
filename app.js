@@ -27,20 +27,6 @@ siteInfo = config['site'];
 
 console.log(siteInfo);
 
-// Start listening for standard input.
-process.stdin.resume();
-// Make sure they really want to exit.
-var sigintCount = 0;
-process.on('SIGINT', function () {
-  if (!sigintCount) {
-    console.log('Got SIGINT.  Press Control-C again to exit.');
-    sigintCount++;
-  }
-  else {
-    process.exit(1);
-  }
-});
-
 var Session = connect.middleware.session.Session,
     parseCookie = connect.utils.parseCookie
 
@@ -279,14 +265,30 @@ function start_app(callback) {
 }
 
 if (require.main === module) {
+
+  // Start listening for standard input.
+  process.stdin.resume();
+  // Make sure they really want to exit.
+  var sigintCount = 0;
+  process.on('SIGINT', function () {
+    if (!sigintCount) {
+      console.log('Got SIGINT.  Press Control-C again to exit.');
+      sigintCount++;
+    }
+    else {
+      process.exit(1);
+    }
+  });
+
   start_app(function(){
-    log.info("Express server listening on port %d in %s mode", app.address().port, app.settings.env);
+    log.info("Express server listening in %s mode", app.settings.env);
   });
   module.exports = app;
+
 } else {  
   module.exports = function (callback) {
     start_app(function(){
-      log.info("Express server listening on port %d in %s mode", app.address().port, app.settings.env);
+      log.info("Express server listening in %s mode", app.settings.env);
     });
     return app;
   };

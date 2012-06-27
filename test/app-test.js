@@ -8,8 +8,10 @@ vows.describe('General Pages').addBatch({
       var cb = this.callback;
       require('../app.js')(function () {
         console.log('Server ready for testing.');
-        cb()
       });
+      setTimeout(function(){
+        cb();
+      }, 2000);
     },
     'Loading page': {
       'About': {
