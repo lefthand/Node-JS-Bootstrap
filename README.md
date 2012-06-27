@@ -16,12 +16,11 @@ The first time you run app.js a root user will be created for you. The login cre
 
 Stack
 =====
--  node.js
--  express
+-  node.js with express
 -  mongodb
 -  redis
 
-Node Module
+Node Modules
 ===========
 -  jade
 -  mail

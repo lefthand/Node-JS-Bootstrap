@@ -7,7 +7,8 @@ ul#userMosaic
   - each user in users
     li
       a(href='/user/#{user._id}/')
-        img(src='http://static1.robohash.com/#{user.name}.png?set=set1&size=240x240')
+        #img(src='http://static1.robohash.com/#{user.name}.png?set=set1&size=240x240')
+        img(src='#{user.image}')
         br
         h4=user.name
 - if (loggedInUser.is_admin) 

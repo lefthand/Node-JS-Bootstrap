@@ -15,21 +15,15 @@ log = log4js.getLogger('app');
 var path = require('path');
 var fs = require('fs');
 exists = fs.existsSync || path.existsSync;
-if (exists('./configLocal.js')) {
-  var config = require('./configLocal.js');
-  mail = require('mail').Mail(
-    config.getMailConfig()
-  );
-  siteInfo = config.getSiteConfig();
+if (exists('./configLocal.json')) {
+  config = require('./configLocal.json');
 }
 else {
-  log.warn('Please copy configDefault.js to configLocal.js and replace applicable values.');
-  var config = require('./configDefault.js');
-  mail = require('mail').Mail(
-    config.getMailConfig()
-  );
-  siteInfo = config.getSiteConfig();
+  log.warn('Please copy configDefault.json to configLocal.json and replace applicable values.');
+  config = require('./configDefault');
 }
+mail = config['mail']; 
+siteInfo = config['site'];
 
 console.log(siteInfo);
 
@@ -278,7 +272,6 @@ function start_app(callback) {
             else {
               log.info('You can now login with username "admin" and password "' + newPassword + '"'); 
               app.listen(3002, callback);
-              log.info("Express server listening on port %d in %s mode", app.address().port, app.settings.env);
             }
           });
         }
@@ -287,17 +280,22 @@ function start_app(callback) {
     else {
       // There is a user, this isn't the first run so let's get it started
       app.listen(3002, callback);
-      log.info("Express server listening on port %d in %s mode", app.address().port, app.settings.env);
     }
   });
 }
 
+app.on('listen', function () {
+});
 if (require.main === module) {
-  start_app();
+  start_app(function(){
+    log.info("Express server listening on port %d in %s mode", app.address().port, app.settings.env);
+  });
   module.exports = app;
 } else {  
   module.exports = function (callback) {
-    start_app(callback);
+    start_app(function(){
+      log.info("Express server listening on port %d in %s mode", app.address().port, app.settings.env);
+    });
     return app;
   };
 }

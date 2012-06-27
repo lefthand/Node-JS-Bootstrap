@@ -19,6 +19,7 @@
     , "eyes": "*"
     , "request": "*"
     , "tooljs": "*"
+    , "gravatar": "*"
   },
   "scripts": {
     "test": "vows --spec"
