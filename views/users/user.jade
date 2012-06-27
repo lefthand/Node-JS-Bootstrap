@@ -16,7 +16,7 @@ p Username: #{user.username}
 -if (loggedInUser.is_root)
   p Is Root: #{user.is_root}
 p Image:
-  img(src='http://static1.robohash.com/#{user.name}')
+  img(src='#{user.image}')
 h3 Posts by this user
 - if (posts.length == 0)
   p This user has no posts... yet.

@@ -27,6 +27,20 @@ siteInfo = config['site'];
 
 console.log(siteInfo);
 
+// Start listening for standard input.
+process.stdin.resume();
+// Make sure they really want to exit.
+var sigintCount = 0;
+process.on('SIGINT', function () {
+  if (!sigintCount) {
+    console.log('Got SIGINT.  Press Control-C again to exit.');
+    sigintCount++;
+  }
+  else {
+    process.exit(1);
+  }
+});
+
 var Session = connect.middleware.session.Session,
     parseCookie = connect.utils.parseCookie
 
@@ -202,10 +216,6 @@ PostHelper.add_routes(app);
 UserHelper.add_routes(app);
 AdminHelper.add_routes(app, express);
 
-app.get('/listen', loadGlobals, function(req, res){
-  res.render('listen', {layout:false});
-});
-
 io.sockets.on('connection', function (socket) {
   var hs = socket.handshake; 
   hs.session.info = {IConnected:'And all I got was this lousy status message.'}
@@ -218,23 +228,7 @@ io.sockets.on('connection', function (socket) {
   socket.on('new post', function (data) {
     socket.broadcast.emit('newPost', { title: data });
   });
-
-//  chatProvider.findAll(function(error, lines) {
-//    for (var i in lines) {
-//      message = lines[i].line;
-//      var messageId = '';
-//      if (hs.session.user && hs.session.user.is_admin) {
-//        messageId = lines[i]._id;
-//      }
-//      socket.emit('repeat', { youSaid: message, messageId: messageId });
-//    }
-//  }); 
-//  socket.on('user message', function (data) {
-//    socket.broadcast.emit('repeat', { youSaid: data });
-//    chatProvider.save({line: data}); 
-//  });
 });
-
 
 // If this is the first time this app has been run insert a new admin user
 function start_app(callback) {
@@ -284,8 +278,6 @@ function start_app(callback) {
   });
 }
 
-app.on('listen', function () {
-});
 if (require.main === module) {
   start_app(function(){
     log.info("Express server listening on port %d in %s mode", app.address().port, app.settings.env);

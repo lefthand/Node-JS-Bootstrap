@@ -5,4 +5,5 @@ app.log
 .project
 .settings
 configLocal.js
+configLocal.json
 Capfile

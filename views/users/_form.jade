@@ -21,6 +21,16 @@ form(method='POST', action='/user/submit/#{user._id}', id='userForm')
     p 
       label(for="is_admin") Is Admin:
       input(type='checkbox', checked=user.is_admin, name='is_admin', id='is_admin')
+  -if (user.email && user.name)
+    p Image:
+      input(type='radio', checked=user.imageIsRoboHash, name='image', id='image', value='#{user.robohash}')
+      img(src='#{user.robohash}')
+      input(type='radio', checked=user.imageIsRoboHash2, name='image', id='image', value='#{user.robohash2}')
+      img(src='#{user.robohash2}')
+      input(type='radio', checked=user.imageIsRoboHash3, name='image', id='image', value='#{user.robohash3}')
+      img(src='#{user.robohash3}')
+      input(type='radio', checked=user.imageIsGravitar, name='image', id='image', value='#{user.gravitar}')
+      img(src='#{user.gravitar}')
   p
     input(type='submit', value='Save')
 -if ((loggedInUser.is_root || loggedInUser.is_admin || loggedInUser._id === user._id) && user._id > 0)

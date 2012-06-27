@@ -2,12 +2,13 @@
   "site": {
     "site_url": "http://localhost:3002",
     "site_name": "Node.JS Bootstrap",
-    "site_email": "YOUR EMAIL ADDRESS",
+    "site_email": "Your email Address",
     "database_collection": "bootstrap"
   },
   "mail": {
     "host": "smtp.gmail.com",
-    "username": "YOUR GMAIL ADDRESS",
-    "password": "YOUR GMAIL PASSWORD"
+    "username": "yourGMAILaddress",
+    "password": "yourGMAILpassword"
   }
 }
+
