@@ -22,7 +22,7 @@ else {
   log.warn('Please copy configDefault.json to configLocal.json and replace applicable values.');
   config = require('./configDefault');
 }
-mail = config['mail']; 
+mail = require('mail').Mail(config['mail']);
 siteInfo = config['site'];
 
 console.log(siteInfo);

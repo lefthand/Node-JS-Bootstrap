@@ -1,16 +1,19 @@
-script(src='/javascripts/jquery.validate.min.js', type='text/javascript') 
+script(src='http://ajax.aspnetcdn.com/ajax/jquery.validate/1.9/jquery.validate.js', type='text/javascript') 
 script
-  $(document).ready(
-    function(){
-      $('#postForm').validate({
-        rules:{
-          email:{
-            remote: {
-              url:'/post/validate/email/',
-              type:'post'
+  $(document).ready(function(){
+    $('#postForm').validate({
+      rules:{
+        email_address:{
+          remote: {
+            url:'/post/validate/email/',
+            type:'post',
+            data: {
+              email_address: function() {
+                return $("#email_address").val();
+              }
             }
           }
         }
-      });
-    }
-  );
+      }
+    });
+  });

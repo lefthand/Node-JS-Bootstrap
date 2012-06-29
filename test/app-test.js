@@ -34,11 +34,21 @@ vows.describe('General Pages').addBatch({
     'ajax validate existing email address': {
       topic: function() {
          request({ method: 'POST',
-             url: 'http://localhost:3002/post/validate/email/?email=admin@example.com'
+             url: 'http://localhost:3002/post/validate/email/?email_address=admin@example.com'
              }, this.callback);
        },
        'will be rejected': function (error, res, body) {
          assert.match(body, /false/);
+       }
+    },
+    'ajax validate new email address': {
+      topic: function() {
+         request({ method: 'POST',
+             url: 'http://localhost:3002/post/validate/email/?email_address=this_is_a_new_email_address1234@example.com'
+             }, this.callback);
+       },
+       'will be accepted': function (error, res, body) {
+         assert.match(body, /true/);
        }
     },
   },
