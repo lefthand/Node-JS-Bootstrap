@@ -283,7 +283,6 @@ if (require.main === module) {
   start_app(function(){
     log.info("Express server listening in %s mode", app.settings.env);
   });
-  module.exports = app;
 
 } else {  
   module.exports = function (callback) {
