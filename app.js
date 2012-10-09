@@ -21,8 +21,16 @@ siteInfo = config['site'];
 dbInfo = config['database'];
 redisOptions = config['redis'];
 
+if (process.env.REDISTOGO_URL) {
+  // Use some regex to parse out the redis to go values.
+  redisUrl = process.env.REDISTOGO_URL;
+  redisValues = redisUrl.match(/redis:\/\/([a-z]*):([a-z0-9]*)@([a-z0-9.]*):([0-9]*)\//);
+  redisOptions = { "host":redisValues[3], "port":redisValues[4], "pass":redisValues[2]};
+}
+console.log(redisOptions);
+
 var RedisStore = require('connect-redis')(express);
-var sessionStore = new RedisStore(process.env.REDISTOGO_URL);
+var sessionStore = new RedisStore(redisOptions);
 var redis = require("redis");
 var client = redis.createClient();
 var connect = require('express/node_modules/connect');
