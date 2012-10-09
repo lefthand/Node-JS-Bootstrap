@@ -18,18 +18,18 @@ else {
 }
 mail = require('mail').Mail(config['mail']);
 siteInfo = config['site'];
-dbInfo = config['database'];
-redisOptions = config['redis'];
-console.log(redisOptions);
+//dbInfo = config['database'];
+//redisOptions = config['redis'];
 
 var RedisStore = require('connect-redis')(express);
-var sessionStore = new RedisStore(redisOptions);
+var sessionStore = new RedisStore(process.env.REDISTOGO_URL);
 var redis = require("redis");
 var client = redis.createClient();
 var connect = require('express/node_modules/connect');
 var bcrypt = require('bcrypt'); 
 
 console.log(siteInfo);
+console.log(process.env);
 
 var Session = connect.middleware.session.Session,
     parseCookie = connect.utils.parseCookie
@@ -118,7 +118,7 @@ dbUrl = dbInfo.url;
 if (dbInfo.username && dbInfo.password) {
   dbUrl = dbInfo.username + ':' + dbInfo.password + '@' + dbUrl;  
 }
-var db = mongo.db( dbUrl + ':' + dbInfo.port + '/' + dbInfo.db_name);
+var db = mongo.db(process.env.DATABASE_URL);
 postDb = db.collection('post');
 userDb = db.collection('user');
 categoryDb = db.collection('category');
