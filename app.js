@@ -4,12 +4,6 @@ var mongo = require('mongoskin');
 var PostHelper = require('./lib/post.js');
 var UserHelper = require('./lib/user.js');
 var AdminHelper = require('./lib/admin.js');
-var connect = require('express/node_modules/connect');
-var RedisStore = require('connect-redis')(express);
-var sessionStore = new RedisStore();
-var redis = require("redis");
-var client = redis.createClient();
-var bcrypt = require('bcrypt'); 
 var log4js = require('log4js');
 log = log4js.getLogger('app');
 var path = require('path');
@@ -25,6 +19,15 @@ else {
 mail = require('mail').Mail(config['mail']);
 siteInfo = config['site'];
 dbInfo = config['database'];
+redisOptions = config['redis'];
+console.log(redisOptions);
+
+var RedisStore = require('connect-redis')(express);
+var sessionStore = new RedisStore(redisOptions);
+var redis = require("redis");
+var client = redis.createClient();
+var connect = require('express/node_modules/connect');
+var bcrypt = require('bcrypt'); 
 
 console.log(siteInfo);
 

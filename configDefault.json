@@ -11,6 +11,11 @@
     "username": "",
     "password": ""
   },
+  "redis": {
+    "host": "",
+    "port": "",
+    "pass":""
+  },
   "mail": {
     "host": "smtp.gmail.com",
     "username": "yourGMAILaddress",
