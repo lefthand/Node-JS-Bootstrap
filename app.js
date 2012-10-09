@@ -117,11 +117,11 @@ if (process.env.MONGOHQ_URL) {
   mongoUrl = process.env.MONGOHQ_URL; 
 }
 else {
-  dbUrl = dbInfo.url;
+  mongoUrl = dbInfo.url;
   if (dbInfo.username && dbInfo.password) {
-    dbUrl = dbInfo.username + ':' + dbInfo.password + '@' + dbUrl;  
+    mongoUrl = dbInfo.username + ':' + dbInfo.password + '@' + dbUrl;  
   }
-  dbUrl += ':' + dbInfo.port + '/' + dbInfo.db_name;
+  mongoUrl += ':' + dbInfo.port + '/' + dbInfo.db_name;
 }
 var db = mongo.db(dbUrl);
 postDb = db.collection('post');
