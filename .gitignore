@@ -6,4 +6,5 @@ app.log
 .settings
 configLocal.js
 configLocal.json
+configHeroku.json
 Capfile

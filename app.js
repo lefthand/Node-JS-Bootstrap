@@ -24,6 +24,7 @@ else {
 }
 mail = require('mail').Mail(config['mail']);
 siteInfo = config['site'];
+dbInfo = config['database'];
 
 console.log(siteInfo);
 
@@ -110,7 +111,11 @@ String.prototype.randomString = function(stringLength) {
 }
 
 // connect to the db and make the collections available globally
-var db = mongo.db('localhost:27017/' + siteInfo.database_collection);
+dbUrl = dbInfo.url;
+if (dbInfo.username && dbInfo.password) {
+  dbUrl = dbInfo.username + ':' + dbInfo.password + '@' + dbUrl;  
+}
+var db = mongo.db( dbUrl + ':' + dbInfo.port + '/' + dbInfo.db_name);
 postDb = db.collection('post');
 userDb = db.collection('user');
 categoryDb = db.collection('category');
