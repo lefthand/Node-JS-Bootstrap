@@ -18,8 +18,6 @@ else {
 }
 mail = require('mail').Mail(config['mail']);
 siteInfo = config['site'];
-//dbInfo = config['database'];
-//redisOptions = config['redis'];
 
 var RedisStore = require('connect-redis')(express);
 var sessionStore = new RedisStore(process.env.REDISTOGO_URL);
@@ -113,11 +111,6 @@ String.prototype.randomString = function(stringLength) {
   return randomString; 
 }
 
-// connect to the db and make the collections available globally
-dbUrl = dbInfo.url;
-if (dbInfo.username && dbInfo.password) {
-  dbUrl = dbInfo.username + ':' + dbInfo.password + '@' + dbUrl;  
-}
 var db = mongo.db(process.env.DATABASE_URL);
 postDb = db.collection('post');
 userDb = db.collection('user');
