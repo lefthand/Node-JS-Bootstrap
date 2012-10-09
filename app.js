@@ -119,11 +119,11 @@ if (process.env.MONGOHQ_URL) {
 else {
   mongoUrl = dbInfo.url;
   if (dbInfo.username && dbInfo.password) {
-    mongoUrl = dbInfo.username + ':' + dbInfo.password + '@' + dbUrl;  
+    mongoUrl = dbInfo.username + ':' + dbInfo.password + '@' + mongoUrl;  
   }
   mongoUrl += ':' + dbInfo.port + '/' + dbInfo.db_name;
 }
-var db = mongo.db(dbUrl);
+var db = mongo.db(mongoUrl);
 postDb = db.collection('post');
 userDb = db.collection('user');
 categoryDb = db.collection('category');
