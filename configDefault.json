@@ -2,7 +2,7 @@
   "site": {
     "site_url": "http://localhost:3002",
     "site_name": "Node.JS Bootstrap",
-    "site_email": "Your email Address",
+    "site_email": "Your email Address"
   },
   "database": {
     "db_name": "bootstrap",
