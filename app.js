@@ -18,6 +18,8 @@ else {
 }
 mail = require('mail').Mail(config['mail']);
 siteInfo = config['site'];
+dbInfo = config['database'];
+redisOptions = config['redis'];
 
 var RedisStore = require('connect-redis')(express);
 var sessionStore = new RedisStore(process.env.REDISTOGO_URL);
@@ -111,7 +113,17 @@ String.prototype.randomString = function(stringLength) {
   return randomString; 
 }
 
-var db = mongo.db(process.env.DATABASE_URL);
+if (process.env.MONGOHQ_URL) {
+  mongoUrl = process.env.MONGOHQ_URL; 
+}
+else {
+  dbUrl = dbInfo.url;
+  if (dbInfo.username && dbInfo.password) {
+    dbUrl = dbInfo.username + ':' + dbInfo.password + '@' + dbUrl;  
+  }
+  dbUrl += ':' + dbInfo.port + '/' + dbInfo.db_name;
+}
+var db = mongo.db(dbUrl);
 postDb = db.collection('post');
 userDb = db.collection('user');
 categoryDb = db.collection('category');
