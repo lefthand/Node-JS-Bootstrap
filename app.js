@@ -272,7 +272,8 @@ function start_app(callback) {
     }
     else {
       // There is a user, this isn't the first run so let's get it started
-      app.listen(3002, callback);
+      var port = process.env.PORT || 3002;
+      app.listen(port, callback);
     }
   });
 }
