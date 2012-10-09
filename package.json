@@ -23,5 +23,9 @@
   },
   "scripts": {
     "test": "vows --spec"
+  },
+  "engines": {
+    "node": "0.8.x",
+    "npm": "1.1.x"
   }
 }
