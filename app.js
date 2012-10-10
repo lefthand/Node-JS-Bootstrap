@@ -272,7 +272,8 @@ function start_app(callback) {
             }
             else {
               log.info('You can now login with username "admin" and password "' + newPassword + '"'); 
-              app.listen(3002, callback);
+              var port = process.env.PORT || 3002;
+              app.listen(port, callback);
             }
           });
         }
