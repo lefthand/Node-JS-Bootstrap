@@ -16,7 +16,8 @@ else {
   log.warn('Please copy configDefault.json to configLocal.json and replace applicable values.');
   config = require('./configDefault');
 }
-mail = require('mail').Mail(config['mail']);
+email = require("./node_modules/emailjs/email");
+server  = email.server.connect(config['mail']);
 siteInfo = config['site'];
 dbInfo = config['database'];
 redisOptions = config['redis'];
@@ -114,11 +115,14 @@ String.prototype.randomString = function(stringLength) {
 }
 
 // connect to the db and make the collections available globally
-dbUrl = dbInfo.url;
+
+mongoUrl = dbInfo.url;
 if (dbInfo.username && dbInfo.password) {
-  dbUrl = dbInfo.username + ':' + dbInfo.password + '@' + dbUrl;  
+  mongoUrl = dbInfo.username + ':' + dbInfo.password + '@' + mongoUrl;  
 }
-var db = mongo.db( dbUrl + ':' + dbInfo.port + '/' + dbInfo.db_name);
+mongoUrl += ':' + dbInfo.port + '/' + dbInfo.db_name;
+var db = mongo.db(mongoUrl);
+
 postDb = db.collection('post');
 userDb = db.collection('user');
 categoryDb = db.collection('category');

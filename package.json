@@ -6,7 +6,7 @@
       "express": "2.5.9"
     , "stylus": "*"
     , "mkdirp": "*"
-    , "mail": "*"
+    , "emailjs": "*"
     , "jade": "*"
     , "log4js": "*"
     , "mongodb": "*"
