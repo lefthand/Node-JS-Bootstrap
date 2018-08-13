@@ -12,7 +12,7 @@ Setup
 - Make sure that redis is running locally.
 - *OPTIONAL* Copy configDefault.js to configLocal.js and edit values to set the mongo database name, site settings, and get email functionality. 
 
-The first time you run app.js a root user will be created for you. The login credentials will be *output to the the console*. 
+The first time you run app.js a root user will be created for you. The login credentials will be *output to the console*. 
 
 Stack
 =====
